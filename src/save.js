@@ -2,7 +2,7 @@
 // Es desa només als límits de fase (començament de cada planificació i final de
 // partida): és un punt de represa honest i evita haver de congelar enemics a mig vol.
 import { GRID_W, GRID_H, EVENTS, TOWERS } from './config.js';
-import { mulberry32, coreRect, idx } from './grid.js';
+import { mulberry32, coreRect, idx, MAP_ARCHETYPES } from './grid.js';
 import { recomputeField, setNextId } from './game.js';
 
 export const SAVE_VERSION = 1;
@@ -24,6 +24,7 @@ export function serialize(g, extra = {}) {
     wave: g.wave,
     endless: g.endless,
     difficulty: g.difficulty,
+    archetype: g.archetype,
     lastWaveReport: g.lastWaveReport,
     overloadUsed: g.overloadUsed,
     fog: g.modifiers.fog,
@@ -80,6 +81,7 @@ export function restore(raw) {
       wave: d.wave,
       endless: !!d.endless,
       difficulty: ['easy', 'normal', 'hard'].includes(d.difficulty) ? d.difficulty : 'normal',
+      archetype: MAP_ARCHETYPES.includes(d.archetype) ? d.archetype : 'open',
       lastWaveReport: d.lastWaveReport || null,
       phase: 'planning',
       tick: 0,

@@ -41,11 +41,13 @@ export function coreCenter(core) {
   return { x: core.x + core.w / 2 - 0.5, y: core.y + core.h / 2 - 0.5 };
 }
 
+export const MAP_ARCHETYPES = ['open', 'canyon', 'maze', 'spiral'];
+
 /**
  * Genera terreny: blocs de roca aleatoris que creen diversos corredors
  * possibles cap al nucli, garantint sempre connectivitat des de cada entrada.
  */
-export function generateTerrain(rng, core, spawns) {
+export function generateTerrain(rng, core, spawns, archetype = 'open') {
   const cells = createGrid();
   const protectedCell = (x, y) => {
     if (isCoreCell(core, x, y)) return true;
@@ -55,16 +57,43 @@ export function generateTerrain(rng, core, spawns) {
     return false;
   };
 
-  const blobs = 9 + Math.floor(rng() * 4);
+  const settings = {
+    open: { blobs: 5, size: 3 },
+    canyon: { blobs: 8, size: 4 },
+    maze: { blobs: 14, size: 4 },
+    spiral: { blobs: 7, size: 3 },
+  }[archetype] || { blobs: 9, size: 3 };
+  const blobs = settings.blobs + Math.floor(rng() * 3);
   for (let b = 0; b < blobs; b++) {
     const bx = 2 + Math.floor(rng() * (GRID_W - 6));
     const by = Math.floor(rng() * GRID_H);
-    const size = 2 + Math.floor(rng() * 4);
+    const size = 2 + Math.floor(rng() * settings.size);
     let cx = bx, cy = by;
     for (let s = 0; s < size; s++) {
       if (inBounds(cx, cy) && !protectedCell(cx, cy)) cells[idx(cx, cy)].t = 'rock';
       const d = DIRS[Math.floor(rng() * 4)];
       cx += d[0]; cy += d[1];
+    }
+  }
+
+  if (archetype === 'canyon') {
+    for (let y = 1; y < GRID_H - 1; y += 3) {
+      for (let x = 3; x < core.x - 1; x++) {
+        if (!protectedCell(x, y) && rng() > 0.16) cells[idx(x, y)].t = 'rock';
+      }
+    }
+  } else if (archetype === 'spiral') {
+    for (let layer = 0; layer < 3; layer++) {
+      const left = 2 + layer * 2, top = 1 + layer * 2;
+      const right = core.x - 2 - layer, bottom = GRID_H - 2 - layer * 2;
+      for (let x = left; x <= right; x++) {
+        if (!protectedCell(x, top)) cells[idx(x, top)].t = 'rock';
+        if (!protectedCell(x, bottom)) cells[idx(x, bottom)].t = 'rock';
+      }
+      for (let y = top; y <= bottom; y++) {
+        if (!protectedCell(left, y)) cells[idx(left, y)].t = 'rock';
+        if (!protectedCell(right, y)) cells[idx(right, y)].t = 'rock';
+      }
     }
   }
 

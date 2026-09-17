@@ -5,7 +5,7 @@ import {
 } from './config.js';
 import {
   mulberry32, idx, inBounds, coreRect, coreCenter, isCoreCell, generateTerrain,
-  defaultSpawns, SCHEDULED_BREACHES, flowField, nextStep, allSpawnsConnected, nearestFree,
+  defaultSpawns, SCHEDULED_BREACHES, MAP_ARCHETYPES, flowField, nextStep, allSpawnsConnected, nearestFree,
   ROUTE_PREFS, randomRoutePref,
 } from './grid.js';
 
@@ -21,12 +21,15 @@ export function createGame(seed, options = {}) {
   const difficulty = difficultyAt(options.difficulty);
   const difficultyKey = ['easy', 'normal', 'hard'].includes(options.difficulty)
     ? options.difficulty : 'normal';
-  const cells = generateTerrain(rng, core, spawns);
+  const archetype = MAP_ARCHETYPES.includes(options.archetype)
+    ? options.archetype : MAP_ARCHETYPES[Math.floor(rng() * MAP_ARCHETYPES.length)];
+  const cells = generateTerrain(rng, core, spawns, archetype);
 
   const g = {
     seed: s,
     endless: !!options.endless,
     difficulty: difficultyKey,
+    archetype,
     rng,
     cells,
     core,

@@ -20,8 +20,8 @@ infinit perquè dona més vida al bucle de joc i aprofita el sistema de puntuaci
   i durada; també queda inclòs en el desat.
 4. **Tutorial contextual** — ✅ ajuda inferior contextual per construir, observar rutes i
   arribar a la primera mutació; pendent afegir una guia específica de fusions.
-5. **Arquetips de mapa** — afegir mapes de canó, espiral, laberint i camp obert a partir
-  de la llavor existent.
+5. **Arquetips de mapa** — ✅ mapes obert, canó, laberint i espiral, seleccionats per la
+  llavor i protegits per la prova de connectivitat.
 6. **Avís de cobertura** — detectar abans de cada onada si falta resposta contra Voladors,
   Blindats, Divisors o altres famílies.
 7. **Desfer accions de planificació** — recuperar l'estat anterior mentre la invasió no
