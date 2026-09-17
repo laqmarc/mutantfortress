@@ -26,6 +26,7 @@ const wrap = document.getElementById('canvasWrap');
 let g = createGame();
 let best = 0;
 let snapshot = null;
+let undoSnapshot = null;
 
 const view = {
   mode: 'idle',          // idle | build | move | fuse | transform
@@ -154,6 +155,7 @@ function enterPlanning(fromSave = false) {
 }
 
 function enterInvasion() {
+  undoSnapshot = null;
   startInvasion(g);
   running = true;
   lastTickAt = performance.now();
@@ -192,8 +194,31 @@ function endGame(won) {
   document.querySelector('[data-same-seed]').onclick = () => newGame(g.seed);
 }
 
-function newGame(seed, endless = false) {
-  g = createGame(seed, { endless });
+function planAction(action) {
+  const before = g.phase === 'planning' ? serialize(g) : null;
+  const result = action();
+  if (result?.ok && before) undoSnapshot = before;
+  return result;
+}
+
+function undoPlanning() {
+  if (g.phase !== 'planning' || !undoSnapshot) return false;
+  const restored = restore(undoSnapshot);
+  if (!restored?.game) return false;
+  g = restored.game;
+  undoSnapshot = null;
+  fxp.reset();
+  resetMode();
+  autosave();
+  refreshAll();
+  UI.setHint('ui.undone');
+  schedule();
+  return true;
+}
+
+function newGame(seed, endless = false, difficulty = 'normal') {
+  g = createGame(seed, { endless, difficulty });
+  undoSnapshot = null;
   fxp.reset();
   view.selected = null;
   view.cursor = { x: Math.max(0, g.core.x - 3), y: g.core.y };
@@ -207,6 +232,7 @@ function newGame(seed, endless = false) {
 
 function resumeGame(restored) {
   g = restored;
+  undoSnapshot = null;
   fxp.reset();
   view.selected = null;
   view.cursor = { x: Math.max(0, g.core.x - 3), y: g.core.y };
@@ -229,6 +255,7 @@ function resetMode() {
 
 function refreshAll() {
   UI.renderTop(g);
+  UI.renderUndo(g, !!undoSnapshot);
   UI.renderPalette(g, view, pickBuild);
   UI.renderInspector(g, view, onAction);
   UI.renderEvent(g);
@@ -261,7 +288,7 @@ function commitCell(cell) {
 
   if (view.mode === 'build' && view.buildKey) {
     if (tw) { selectTower(tw.id); return; }
-    const r = buildTower(g, view.buildKey, cell.x, cell.y);
+    const r = planAction(() => buildTower(g, view.buildKey, cell.x, cell.y));
     if (!r.ok) { audio.sfx('error'); UI.setHint(r.msg, r.params, true); }
     else {
       const still = g.scrap >= TOWERS[view.buildKey].cost
@@ -278,7 +305,7 @@ function commitCell(cell) {
 
   if (view.mode === 'move' && view.selected != null) {
     const src = g.towers.get(view.selected);
-    const r = moveTower(g, src, cell.x, cell.y);
+    const r = planAction(() => moveTower(g, src, cell.x, cell.y));
     if (!r.ok) { audio.sfx('error'); UI.setHint(r.msg, r.params, true); }
     else {
       view.mode = 'idle';
@@ -295,7 +322,7 @@ function commitCell(cell) {
     const a = g.towers.get(view.selected);
     if (tw && canFusePair(g, a, tw)) {
       const ax = a.x, ay = a.y;
-      const r = fuseTowers(g, a, tw);
+      const r = planAction(() => fuseTowers(g, a, tw));
       if (!r.ok) { audio.sfx('error'); UI.setHint(r.msg, r.params, true); }
       else {
         audio.sfx('fuse');
@@ -372,7 +399,7 @@ function onAction(act, tw, arg) {
       UI.setHint('ui.moveHint', { name: towerName(tw.key) });
       break;
     case 'mutate-to': {
-      const r = mutateTower(g, tw, arg);
+      const r = planAction(() => mutateTower(g, tw, arg));
       if (!r.ok) { audio.sfx('error'); return UI.setHint(r.msg, r.params, true); }
       audio.sfx('mutate');
       fxAt(tw.x, tw.y, TOWERS[r.key].color, 'mutate');
@@ -389,7 +416,7 @@ function onAction(act, tw, arg) {
       view.mode = view.mode === 'transform' ? 'idle' : 'transform';
       break;
     case 'transform-to': {
-      const r = transformTower(g, tw, arg);
+      const r = planAction(() => transformTower(g, tw, arg));
       view.mode = 'idle';
       if (!r.ok) { audio.sfx('error'); return UI.setHint(r.msg, r.params, true); }
       audio.sfx('build');
@@ -401,7 +428,7 @@ function onAction(act, tw, arg) {
       UI.setHint('ui.fuseHint', { name: towerName(tw.key) });
       break;
     case 'millorar': {
-      const r = upgradeTower(g, tw);
+      const r = planAction(() => upgradeTower(g, tw));
       if (!r.ok) { audio.sfx('error'); return UI.setHint(r.msg, r.params, true); }
       audio.sfx('build');
       fxAt(tw.x, tw.y, TOWERS[tw.key].accent, 'build');
@@ -415,7 +442,7 @@ function onAction(act, tw, arg) {
     case 'reciclar':
       audio.sfx('recycle');
       fxAt(tw.x, tw.y, TOWERS[tw.key].color, 'move');
-      recycleTower(g, tw);
+      planAction(() => recycleTower(g, tw));
       view.selected = null; view.mode = 'idle';
       break;
   }
@@ -508,7 +535,7 @@ function cycleSpeed() {
 }
 
 function doOverload() {
-  const r = overload(g);
+  const r = planAction(() => overload(g));
   audio.sfx(r.ok ? 'overload' : 'error');
   if (r.ok) UI.setHint('ui.overloadDone', { n: g.energy });
   else UI.setHint(r.msg, r.params, true);
@@ -536,6 +563,7 @@ initInput({
   selectTower,
   selectedTower: () => (view.selected != null ? g.towers.get(view.selected) : null),
   action: onAction,
+  undo: undoPlanning,
   pickBuild,
   cancel,
   endTurn,
@@ -555,6 +583,7 @@ initInput({
 
 // ── BOTONS ─────────────────────────────────────────────────
 document.getElementById('btnEnd').onclick = endTurn;
+document.getElementById('btnUndo').onclick = undoPlanning;
 document.getElementById('btnPaths').onclick = togglePaths;
 document.getElementById('btnSpeed').onclick = cycleSpeed;
 document.getElementById('btnHelp').onclick = help;

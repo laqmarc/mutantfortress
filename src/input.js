@@ -196,6 +196,11 @@ export function initInput(api) {
       return;
     }
 
+    if ((ev.ctrlKey || ev.metaKey) && low === 'z') {
+      ev.preventDefault();
+      return api.undo();
+    }
+
     switch (k) {
       case 'ArrowUp': case 'w': case 'W': ev.preventDefault(); return moveCursor(0, -1, ev.shiftKey);
       case 'ArrowDown': case 's': case 'S': ev.preventDefault(); return moveCursor(0, 1, ev.shiftKey);

@@ -71,6 +71,12 @@ export function renderTop(g) {
   tag.className = inv ? 'phase-invasion' : 'phase-planning';
 }
 
+export function renderUndo(g, available) {
+  const button = $('btnUndo');
+  button.disabled = g.phase !== 'planning' || !available;
+  button.classList.toggle('on', g.phase === 'planning' && available);
+}
+
 function bump(el, now, before, hurtOnDrop = false) {
   if (before < 0 || now === before) return;
   const cls = hurtOnDrop && now < before ? 'hurt' : 'bump';

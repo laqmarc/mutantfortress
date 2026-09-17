@@ -24,8 +24,8 @@ infinit perquè dona més vida al bucle de joc i aprofita el sistema de puntuaci
   llavor i protegits per la prova de connectivitat.
 6. **Avís de cobertura** — ✅ la previsualització detecta mancances contra Voladors,
   Blindats, Divisors i Alteradors, amb prova específica.
-7. **Desfer accions de planificació** — recuperar l'estat anterior mentre la invasió no
-  hagi començat.
+7. **Desfer accions de planificació** — ✅ botó i `Ctrl+Z` recuperen l’última instantània
+  vàlida; queda desactivat durant la invasió.
 8. **Més tipus d'enemic** — incorporar Sanador, Escut frontal i Excavador amb proves de
   combat específiques.
 9. **Accessibilitat** — revisar contrast, focus de teclat, etiquetes ARIA, mida de text i
