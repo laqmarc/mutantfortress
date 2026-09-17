@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<!-- El SDK de YouTube Playables HA de carregar-se abans que qualsevol codi del joc.
+     Fora de YouTube el fitxer no existeix i tot l'embolcall de platform.js queda en no-op. -->
+<script src="https://www.youtube.com/game_api/v1"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="theme-color" content="#060a16">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>Mutant Fortress</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Rajdhani:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-tab="build">
+
+<!-- Pantalla de càrrega: hi és quan es crida firstFrameReady() -->
+<div id="loading">
+  <div class="load-logo">◈</div>
+  <div class="load-title">MUTANT FORTRESS</div>
+  <div class="load-bar"><i></i></div>
+  <div class="load-msg" data-i18n="ui.loading">Booting the fortress…</div>
+</div>
+
+<div id="app">
+
+  <!-- BARRA SUPERIOR -->
+  <header id="topbar">
+    <div class="brand">
+      <span class="logo">◈</span>
+      <div>
+        <h1 data-i18n="ui.title">MUTANT FORTRESS</h1>
+        <span class="sub" id="seedLabel">seed —</span>
+      </div>
+    </div>
+
+    <div class="resources">
+      <div class="res res-energy" id="resEnergy" data-i18n-title="ui.energyTip">
+        <span class="ico">⚡</span><b id="energyVal">8</b><span class="max">/8</span>
+        <label data-i18n="ui.energy">ENERGY</label>
+      </div>
+      <div class="res res-scrap" id="resScrap" data-i18n-title="ui.scrapTip">
+        <span class="ico">✦</span><b id="scrapVal">95</b>
+        <label data-i18n="ui.scrap">SCRAP</label>
+      </div>
+      <div class="res res-core" id="resCore" data-i18n-title="ui.coreTip">
+        <span class="ico">◉</span><b id="coreVal">20</b><span class="max">/20</span>
+        <label data-i18n="ui.core">CORE</label>
+      </div>
+    </div>
+
+    <div class="wavebox">
+      <div class="wavenum"><span data-i18n="ui.wave">WAVE</span> <b id="waveVal">1</b><span>/10</span></div>
+      <div class="wavename" id="waveName">Probe</div>
+      <div class="wavebar"><i id="waveBar"></i></div>
+    </div>
+
+    <div class="phasebox">
+      <div id="phaseTag" class="phase-planning">PLANNING</div>
+      <div class="ctrls">
+        <button id="btnMusic" class="ghost on" data-i18n-title="ui.music" aria-label="Music">♪</button>
+        <button id="btnSfx" class="ghost on" data-i18n-title="ui.sfx" aria-label="Sound effects">FX</button>
+        <button id="btnLang" class="ghost" title="Language">CA</button>
+        <button id="btnHelp" class="ghost" data-i18n-title="ui.help" aria-label="Help">?</button>
+        <button id="btnPaths" class="ghost on" data-i18n-title="ui.paths" aria-label="Routes">⤳</button>
+        <button id="btnSpeed" class="ghost" data-i18n-title="ui.speed" aria-label="Speed">1×</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- PANELL ESQUERRE -->
+  <aside id="left">
+    <section class="panel" id="panelBuild" data-group="build">
+      <h2 data-i18n="ui.panelBuild">Deploy defence</h2>
+      <div id="palette" class="palette"></div>
+    </section>
+
+    <section class="panel grow" id="inspector" data-group="build">
+      <h2 data-i18n="ui.panelInspector">Inspector</h2>
+      <div id="inspectorBody" class="hint"></div>
+    </section>
+  </aside>
+
+  <!-- ESCENARI -->
+  <main id="stage">
+    <div id="canvasWrap">
+      <canvas id="board" tabindex="0" data-i18n-title="ui.board" aria-label="Game board"></canvas>
+      <div id="zoomctl">
+        <button id="zoomIn" data-i18n-title="ui.zoomIn" aria-label="Zoom in">+</button>
+        <button id="zoomOut" data-i18n-title="ui.zoomOut" aria-label="Zoom out">−</button>
+        <button id="zoomFit" data-i18n-title="ui.zoomFit" aria-label="Fit board">⛶</button>
+      </div>
+      <div id="banner" class="hidden"></div>
+      <div id="tooltip" class="hidden"></div>
+    </div>
+
+    <div id="confirmBar" class="hidden">
+      <span id="confirmText"></span>
+      <button id="confirmNo" class="ghost" data-i18n-title="ui.cancel" aria-label="Cancel">✕</button>
+      <button id="confirmYes" class="primary tiny" data-i18n="ui.confirm">✓ CONFIRM</button>
+    </div>
+
+    <div id="actionbar">
+      <div id="actionHint" class="action-hint"></div>
+      <button id="btnEnd" class="primary" data-i18n="ui.startInvasion">START INVASION ▸</button>
+    </div>
+  </main>
+
+  <!-- PANELL DRET -->
+  <aside id="right">
+    <section class="panel" id="eventPanel" data-group="wave">
+      <h2 data-i18n="ui.panelEvent">Event</h2>
+      <div id="eventBody" class="hint"></div>
+    </section>
+
+    <section class="panel" id="panelWave" data-group="wave">
+      <h2 data-i18n="ui.panelWave">Next wave</h2>
+      <div id="wavePreview" class="wavelist"></div>
+    </section>
+
+    <section class="panel grow" id="panelLog" data-group="log">
+      <h2 data-i18n="ui.panelLog">Log</h2>
+      <div id="log" class="log"></div>
+    </section>
+  </aside>
+
+  <!-- PESTANYES (només pantalles petites) -->
+  <nav id="tabbar">
+    <button data-tab="build" class="on"><span class="ti">🛠</span><span data-i18n="ui.tabBuild">Defences</span></button>
+    <button data-tab="wave"><span class="ti">⚠</span><span data-i18n="ui.tabWave">Wave</span></button>
+    <button data-tab="log"><span class="ti">▤</span><span data-i18n="ui.tabLog">Log</span></button>
+  </nav>
+
+</div>
+
+<!-- OVERLAY: intro / ajuda / final -->
+<div id="overlay" class="overlay hidden">
+  <div class="modal" id="modal"></div>
+</div>
+
+<script type="module" src="src/main.js"></script>
+</body>
+</html>

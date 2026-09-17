@@ -1,0 +1,119 @@
+# Idees pendents
+
+Backlog de millores per a Fortalesa Mutant, ordenat per retorn sobre esforç.
+Anotat el 2026-09-17, després de tenir el joc jugable amb so i preparat per a Playables.
+
+> ✅ **Mutació amb elecció** — feta. Era la primera d'aquesta llista.
+
+---
+
+## Prioritat alta
+
+### Ampliar l'arbre de fusions
+
+Amb 6 mutacions hi ha **21 combinacions** possibles (15 parelles diferents + 6 del mateix
+tipus) i la taula `FUSIONS` de `src/config.js` només en té 10 definides: **11 de 21 cauen
+a l'Amalgama genèrica**. Més de la meitat de les fusions que descobreixi un jugador seran
+la mateixa torre insípida.
+
+Feina mecànica però és exactament el contingut que fa voler rejugar. Cal nom, descripció
+(EN i CA a `src/i18n.js`), estadístiques i silueta a `drawTowerBody()` de `src/render.js`.
+
+### Mode infinit i nivells de dificultat
+
+Dues raons independents:
+
+- El simulador (`node tools/balance.mjs 40`) guanya el **58-67%** de les partides amb una
+  IA que no reposiciona torres ni fa servir la sobrecàrrega. Per a un jugador humà el joc
+  és probablement massa fàcil. Calen com a mínim tres nivells, i cada un s'hauria de
+  validar amb el simulador abans de donar-lo per bo.
+- Per a un Playable de YouTube el bucle de retenció és la puntuació, i `sendScore` ja està
+  connectat al marcador de la plataforma. Un mode que escali més enllà de l'onada 10
+  converteix una partida acabada en una partida per superar.
+
+Implementació: generar onades procedurals a partir de l'onada 11 escalant `hpMul` i les
+quantitats; la puntuació passa a ser l'onada assolida.
+
+---
+
+## Prioritat mitjana
+
+### Arquetips de mapa
+
+`generateTerrain()` fa taques de roca aleatòries, i el resultat és que tots els mapes es
+juguen igual. Amb quatre arquetips —canó, laberint, camp obert, espiral— canvia la textura
+tàctica sencera per molt poc codi. L'arquetip es tria amb la llavor, així que la llavor
+segueix sent compartible.
+
+### Informe de final d'onada
+
+El sistema de perfils de baixes és invisible: el jugador no sap quina torre fa la feina.
+Un resum en acabar cada onada —repartiment del dany per torre, per quina via han entrat
+les fuites, quants enemics s'han escapat de cada tipus— ensenya a jugar i fa llegible la
+mecànica central. El motor ja té les dades a `g.stats` i a les baixes per torre; només cal
+acumular-les per onada.
+
+### Tutorial contextual a l'onada 1
+
+El modal d'introducció és un mur de text i un públic casual de YouTube no el llegirà. Una
+seqüència de missatges contextuals durant la primera onada («col·loca una defensa aquí»,
+«mira com canvia el camí», «aquesta torre ja pot mutar») és la diferència entre un joc
+que agrada i un joc que la gent acaba. Per a la certificació de Playables això és
+retenció pura.
+
+### Enemics nous
+
+- **Sanador**: cura els enemics adjacents cada tic. Obliga a matar-lo primer.
+- **Escut frontal**: absorbeix el primer impacte de cada tic; premia les torres de
+  cadència alta per sobre de les de cop fort.
+- **Excavador**: ignora una casella de mur per onada.
+
+---
+
+## Prioritat baixa (però barates)
+
+### Desfer l'última acció de planificació
+
+En un joc per torns, perdre 2 d'energia per un clic errat fa ràbia i no aporta res.
+N'hi ha prou amb desar una instantània (`serialize()` ja existeix) a l'inici de cada acció
+i poder-hi tornar mentre no s'hagi iniciat la invasió.
+
+### Modificadors de partida
+
+Triats a l'inici: boira permanent, doble ferralla i mig nucli, sense fusions, tots els
+enemics volen… Reaprofita el sistema d'esdeveniments que ja existeix. Varietat molt barata
+i encaixa amb el mode infinit.
+
+### Avís de cobertura
+
+Durant la planificació, comprovar la composició de la propera onada contra les defenses
+col·locades i avisar del que no pots tocar: «cap defensa antiaèria» quan venen Voladors,
+«cap perforant» quan venen Blindats. Evita la derrota per desconeixement, que és la pitjor
+manera de perdre.
+
+---
+
+## Descartat, i per què
+
+**Que els enemics destrueixin torres.** És la idea que demana el cos, però xoca amb el
+disseny: aquí les torres *són* el laberint, i que te les esborrin converteix una decisió
+tàctica en una loteria. El desgast ja està resolt amb l'Alterador, que les desactiva
+temporalment sense trencar la planificació.
+
+**Temporitzador a la fase de planificació.** Mataria el que fa bo aquest joc, que és poder
+pensar-te la reconfiguració amb calma.
+
+---
+
+## Notes de so, per si es reprèn
+
+El motor d'àudio (`src/audio.js`) té busos separats i dues eines de consola,
+`busGain(nom[, valor])` i `spectrum()`, per ajustar la mescla en calent. Coses que es
+podrien afegir sense tocar l'arquitectura:
+
+- Veu de megafonia de la ciutat en esdeveniments i a l'inici de cada onada (sintetitzada
+  amb formants, o simplement un senyal acústic amb caràcter).
+- Un *stinger* propi per a cada mutació segons el perfil de baixes, en comptes de l'acord
+  genèric actual.
+- Que el filtre de la música s'obri segons la integritat del nucli: com més a prop de la
+  derrota, més tens el so.

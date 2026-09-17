@@ -1,0 +1,13 @@
+# Dependències (el projecte no en té, però per si de cas)
+node_modules/
+npm-debug.log*
+
+# Configuració local de l'editor i de Claude Code
+.claude/settings.local.json
+.vscode/
+.idea/
+
+# Brossa del sistema
+.DS_Store
+Thumbs.db
+desktop.ini
