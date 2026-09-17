@@ -309,6 +309,7 @@ function selectTower(id) {
     const tw = g.towers.get(id);
     if (tw) view.cursor = { x: tw.x, y: tw.y };
     UI.openTab('build');
+    UI.scrollSheetTop();     // al mòbil el full pot venir desplaçat de l'ús anterior
   }
   refreshAll();
 }
@@ -393,6 +394,10 @@ function onAction(act, tw, arg) {
       UI.setHint('ui.upgraded', { name: towerName(tw.key), n: r.lvl });
       break;
     }
+    case 'deseleccionar':
+      audio.sfx('click');
+      view.selected = null;
+      break;
     case 'reciclar':
       audio.sfx('recycle');
       fxAt(tw.x, tw.y, TOWERS[tw.key].color, 'move');

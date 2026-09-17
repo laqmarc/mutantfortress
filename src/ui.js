@@ -101,6 +101,9 @@ export function renderPalette(g, view, onPick) {
 export function renderInspector(g, view, actions) {
   const body = $('inspectorBody');
   const tw = view.selected != null ? g.towers.get(view.selected) : null;
+  // al mòbil la paleta i l'inspector comparteixen un full de 260 px: amb una
+  // torre seleccionada, la paleta fa nosa i tapa els botons d'acció
+  document.body.dataset.sel = tw ? 'tower' : (view.buildKey ? 'build' : 'none');
 
   if (!tw) {
     if (view.buildKey) {
@@ -222,6 +225,8 @@ function headHtml(key, tw = null) {
     <div class="nm" style="color:${d.color}">${towerName(key)}</div>
     ${lvl > 1 ? `<div class="lvl">${t('insp.level', { n: lvl })}</div>` : ''}
     <div class="tier" style="color:${d.tier === 3 ? '#fff' : d.accent}">${t(tier)}</div>
+    ${tw ? `<button class="insp-close" data-act="deseleccionar"
+              aria-label="${t('ui.cancel')}" title="${t('ui.cancel')}">✕</button>` : ''}
   </div>`;
 }
 
@@ -343,6 +348,14 @@ export function setConfirm(html, valid = true) {
   $('confirmText').innerHTML = html;
   bar.classList.toggle('bad', !valid);
   bar.classList.remove('hidden');
+}
+
+/** Torna el full inferior a dalt de tot (al mòbil arrossega l'estat anterior). */
+export function scrollSheetTop() {
+  for (const id of ['left', 'right']) {
+    const el = $(id);
+    if (el) el.scrollTop = 0;
+  }
 }
 
 export function openTab(tab) {

@@ -571,3 +571,35 @@ button.tiny {
   color: var(--amber); border: 1px solid var(--amber);
   background: rgba(255, 210, 77, .12);
 }
+
+/* ── Inspector: botó de tancar ── */
+.insp-close {
+  margin-left: auto; padding: 2px 8px; min-height: 0;
+  font-size: 13px; line-height: 1; border-radius: 6px;
+  background: rgba(255, 255, 255, .06); border-color: rgba(255, 255, 255, .18);
+}
+
+/* ══════════════════════════════════════════════════════════
+   Al mòbil el full inferior és curt i l'inspector hi creix.
+   Dues mesures perquè les accions no quedin mai fora de pantalla:
+   amagar la paleta mentre hi ha una torre seleccionada, i pujar
+   les accions per damunt de les dades.
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 900px), (max-height: 620px) and (orientation: landscape) {
+  body[data-sel="tower"] #panelBuild { display: none; }
+
+  #inspectorBody { display: flex; flex-direction: column; }
+  #inspectorBody > .insp-head { order: 0; }
+  #inspectorBody > .mutbox    { order: 1; }
+  #inspectorBody > .acts      { order: 2; }
+  #inspectorBody > .insp-desc { order: 4; }
+  #inspectorBody > .stats     { order: 5; }
+  #inspectorBody > .tags      { order: 6; }
+  #inspectorBody > .killbars  { order: 7; }
+  #inspectorBody > .mo-note   { order: 8; }
+  #inspectorBody > .hint      { order: 9; }
+
+  /* la descripció llarga i la nota de millores es poden llegir a l'escriptori */
+  #inspectorBody > .insp-desc { font-size: 12px; }
+  #inspectorBody > .mo-note { font-size: 10.5px; }
+}
