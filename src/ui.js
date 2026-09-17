@@ -7,7 +7,7 @@ import {
 import {
   towerStats, killProfile, mutationOptions, canMutate, canFusePair, fusionResult,
   canUpgrade, upgradeCost,
-  upcomingComposition,
+  upcomingComposition, coverageWarnings,
 } from './game.js';
 import {
   t, towerName, towerDesc, towerTags, enemyName, enemyDesc, waveName,
@@ -286,13 +286,17 @@ export function renderWavePreview(g) {
   const comp = upcomingComposition(g);
   if (!comp.length) { el.innerHTML = '<div class="hint">—</div>'; return; }
   const w = waveAt(g.wave);
+  const warnings = coverageWarnings(g);
+  const warningHtml = warnings.length
+    ? `<div class="coverage-warning">⚠ ${warnings.map((key) => t(`coverage.${key}`)).join('<br>⚠ ')}</div>`
+    : '';
   el.innerHTML = comp.map(({ type, n, def }) => `
     <div class="wrow" title="${enemyDesc(type)}">
       <span class="wd" style="background:${def.color};color:${def.color}"></span>
       <span class="wn">${enemyName(type)}</span>
       <span class="wc">×${n}</span>
     </div>`).join('')
-    + `<div class="hint" style="margin-top:7px">${t('wavePrev.hpMul', { n: w.hpMul.toFixed(2) })}</div>`;
+    + `<div class="hint" style="margin-top:7px">${t('wavePrev.hpMul', { n: w.hpMul.toFixed(2) })}</div>${warningHtml}`;
 }
 
 export function renderWaveReport(g) {

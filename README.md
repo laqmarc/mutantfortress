@@ -129,10 +129,14 @@ node tools/test-endless.mjs    # comprova el mode infinit i el seu desat
 node tools/test-difficulty.mjs # comprova les tres dificultats i el seu desat
 node tools/test-wave-report.mjs # comprova l'informe de cada onada
 node tools/test-maps.mjs       # comprova els quatre arquetips de mapa
+node tools/test-coverage.mjs   # comprova els avisos de cobertura
 ```
 
 Cada llavor tria un arquetip de mapa: obert, canó, laberint o espiral. Tots mantenen un
 camí garantit des de cada entrada fins al nucli.
+
+La previsualització de la propera onada avisa si les defenses actuals no poden respondre
+a Voladors, Blindats, Divisors o Alteradors.
 
 Juga N partides senceres amb una IA bàsica i treu la taxa de victòries, les mutacions per
 partida i el dany al nucli onada per onada. Serveix per detectar corbes de dificultat

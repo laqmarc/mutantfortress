@@ -835,7 +835,31 @@ export function waveInfo(g) {
 /** Composició de la propera onada, per mostrar-la a la planificació. */
 export function upcomingComposition(g) {
   const w = waveAt(g.wave);
+  const difficulty = difficultyAt(g.difficulty);
   const map = new Map();
-  for (const grp of w.groups) map.set(grp.e, (map.get(grp.e) || 0) + grp.n);
+  for (const grp of w.groups) {
+    const count = Math.max(1, Math.round(grp.n * difficulty.count));
+    map.set(grp.e, (map.get(grp.e) || 0) + count);
+  }
   return [...map.entries()].map(([type, n]) => ({ type, n, def: ENEMIES[type] }));
+}
+
+/** Capacitats que falten per respondre a la composició de la propera onada. */
+export function coverageWarnings(g) {
+  const comp = upcomingComposition(g);
+  const defs = [...g.towers.values()].map((tower) => TOWERS[tower.key]);
+  const warnings = [];
+  if (comp.some(({ def }) => def.flying) && !g.modifiers.grounded && !defs.some((def) => def.air)) {
+    warnings.push('air');
+  }
+  if (comp.some(({ def }) => def.armor >= 6) && !defs.some((def) => def.pierce)) {
+    warnings.push('armor');
+  }
+  if (comp.some(({ def }) => def.split) && !defs.some((def) => def.noSplit)) {
+    warnings.push('split');
+  }
+  if (comp.some(({ def }) => def.shifter) && !defs.some((def) => def.eventImmune)) {
+    warnings.push('shift');
+  }
+  return warnings;
 }

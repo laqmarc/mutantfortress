@@ -150,6 +150,7 @@ aside { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
   border-bottom: 1px solid var(--panel-line); padding-bottom: 7px; flex: none;
 }
 .hint { font-size: 13px; color: var(--dim); line-height: 1.5; }
+.coverage-warning { margin-top: 8px; color: var(--red); line-height: 1.45; }
 
 /* ── PALETA DE TORRES ── */
 .palette { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }

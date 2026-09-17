@@ -125,6 +125,10 @@ const EN = {
   'insp.hpArmour': 'HP <b>{hp}/{max}</b> · Armour <b>{armour}</b>',
 
   'wavePrev.hpMul': 'HP ×{n} · hover for their abilities.',
+  'coverage.air': 'No anti-air defence',
+  'coverage.armor': 'No piercing defence',
+  'coverage.split': 'No anti-split defence',
+  'coverage.shift': 'No event-immune defence',
 
   'cat.basic': 'Standard',
   'cat.fast': 'Fast',
@@ -505,6 +509,10 @@ const CA = {
   'insp.hpArmour': 'Vida <b>{hp}/{max}</b> · Blindatge <b>{armour}</b>',
 
   'wavePrev.hpMul': 'Vida ×{n} · passa el ratolí per sobre per veure\'n les habilitats.',
+  'coverage.air': 'Cap defensa antiaèria',
+  'coverage.armor': 'Cap defensa perforant',
+  'coverage.split': 'Cap defensa contra Divisors',
+  'coverage.shift': 'Cap defensa immune als events',
 
   'cat.basic': 'Estàndard',
   'cat.fast': 'Ràpids',
