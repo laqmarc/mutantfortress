@@ -134,6 +134,10 @@ button.primary {
 }
 button.primary:hover:not(:disabled) { filter: brightness(1.15); transform: translateY(-2px); }
 button.danger { background: linear-gradient(135deg, #ff4d6b, #ff9a2e); border: none; color: #fff; }
+button:focus-visible, select:focus-visible, #board:focus-visible {
+  outline: 3px solid var(--amber);
+  outline-offset: 3px;
+}
 
 /* ── PANELLS ── */
 aside { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
@@ -258,6 +262,15 @@ aside { display: flex; flex-direction: column; gap: 12px; min-height: 0; }
 .log { overflow-y: auto; font-size: 12px; line-height: 1.45; flex: 1; padding-right: 4px; }
 .log div { padding: 3px 0; border-bottom: 1px solid rgba(140,170,230,.08); color: var(--dim); }
 .log .good { color: var(--lime); } .log .bad { color: var(--red); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 .log .warn { color: var(--amber); } .log .mutate { color: var(--pink); font-weight: 700; }
 .log .phase { color: var(--cyan); font-family: Orbitron, sans-serif; font-size: 10px; letter-spacing: 1.2px; }
 ::-webkit-scrollbar { width: 7px; } ::-webkit-scrollbar-track { background: transparent; }

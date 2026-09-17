@@ -28,8 +28,8 @@ infinit perquè dona més vida al bucle de joc i aprofita el sistema de puntuaci
   vàlida; queda desactivat durant la invasió.
 8. **Més tipus d'enemic** — ✅ Sanador, Escut frontal i Excavador incorporats en onades
   avançades, amb proves de combat específiques.
-9. **Accessibilitat** — revisar contrast, focus de teclat, etiquetes ARIA, mida de text i
-  dependència dels colors.
+9. **Accessibilitat** — ✅ focus visible, noms ARIA, regions dinàmiques anunciades i suport
+  de moviment reduït; pendent una auditoria WCAG manual amb lector de pantalla.
 10. **Resum de partida** — donar puntuació, estadístiques, mutacions descobertes i
    configuració final de la ciutat a la pantalla de victòria o derrota.
 

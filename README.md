@@ -132,6 +132,7 @@ node tools/test-maps.mjs       # comprova els quatre arquetips de mapa
 node tools/test-coverage.mjs   # comprova els avisos de cobertura
 node tools/test-undo.mjs       # comprova el desfer de planificació
 node tools/test-enemies.mjs    # comprova Sanador, Escut i Excavador
+node tools/test-accessibility.mjs # comprova contractes bàsics d'accessibilitat
 ```
 
 Cada llavor tria un arquetip de mapa: obert, canó, laberint o espiral. Tots mantenen un
@@ -145,6 +146,9 @@ Les onades avançades també poden portar un **Sanador**, un **Escut frontal** o
 
 Durant la planificació, el botó ↶ i `Ctrl+Z` desfan l’última acció vàlida. En començar la
 invasió, la instantània es descarta.
+
+La interfície conserva focus visible per teclat, anuncia els estats canviants als lectors
+de pantalla i redueix les animacions quan el sistema ho demana.
 
 Juga N partides senceres amb una IA bàsica i treu la taxa de victòries, les mutacions per
 partida i el dany al nucli onada per onada. Serveix per detectar corbes de dificultat

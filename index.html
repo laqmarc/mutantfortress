@@ -40,15 +40,15 @@
 
     <div class="resources">
       <div class="res res-energy" id="resEnergy" data-i18n-title="ui.energyTip">
-        <span class="ico">⚡</span><b id="energyVal">8</b><span class="max">/8</span>
+        <span class="ico" aria-hidden="true">⚡</span><b id="energyVal" aria-live="polite">8</b><span class="max">/8</span>
         <label data-i18n="ui.energy">ENERGY</label>
       </div>
       <div class="res res-scrap" id="resScrap" data-i18n-title="ui.scrapTip">
-        <span class="ico">✦</span><b id="scrapVal">95</b>
+        <span class="ico" aria-hidden="true">✦</span><b id="scrapVal" aria-live="polite">95</b>
         <label data-i18n="ui.scrap">SCRAP</label>
       </div>
       <div class="res res-core" id="resCore" data-i18n-title="ui.coreTip">
-        <span class="ico">◉</span><b id="coreVal">20</b><span class="max">/20</span>
+        <span class="ico" aria-hidden="true">◉</span><b id="coreVal" aria-live="polite">20</b><span class="max">/20</span>
         <label data-i18n="ui.core">CORE</label>
       </div>
     </div>
@@ -60,11 +60,11 @@
     </div>
 
     <div class="phasebox">
-      <div id="phaseTag" class="phase-planning">PLANNING</div>
+      <div id="phaseTag" class="phase-planning" role="status" aria-live="polite">PLANNING</div>
       <div class="ctrls">
         <button id="btnMusic" class="ghost on" data-i18n-title="ui.music" aria-label="Music">♪</button>
         <button id="btnSfx" class="ghost on" data-i18n-title="ui.sfx" aria-label="Sound effects">FX</button>
-        <button id="btnLang" class="ghost" title="Language">CA</button>
+        <button id="btnLang" class="ghost" data-i18n-title="ui.lang" aria-label="Language">CA</button>
         <button id="btnHelp" class="ghost" data-i18n-title="ui.help" aria-label="Help">?</button>
         <button id="btnPaths" class="ghost on" data-i18n-title="ui.paths" aria-label="Routes">⤳</button>
         <button id="btnSpeed" class="ghost" data-i18n-title="ui.speed" aria-label="Speed">1×</button>
@@ -94,18 +94,18 @@
         <button id="zoomOut" data-i18n-title="ui.zoomOut" aria-label="Zoom out">−</button>
         <button id="zoomFit" data-i18n-title="ui.zoomFit" aria-label="Fit board">⛶</button>
       </div>
-      <div id="banner" class="hidden"></div>
-      <div id="tooltip" class="hidden"></div>
+      <div id="banner" class="hidden" role="status" aria-live="polite"></div>
+      <div id="tooltip" class="hidden" role="tooltip"></div>
     </div>
 
-    <div id="confirmBar" class="hidden">
+    <div id="confirmBar" class="hidden" role="alert">
       <span id="confirmText"></span>
       <button id="confirmNo" class="ghost" data-i18n-title="ui.cancel" aria-label="Cancel">✕</button>
       <button id="confirmYes" class="primary tiny" data-i18n="ui.confirm">✓ CONFIRM</button>
     </div>
 
     <div id="actionbar">
-      <div id="actionHint" class="action-hint"></div>
+      <div id="actionHint" class="action-hint" role="status" aria-live="polite"></div>
       <button id="btnUndo" class="ghost" data-i18n-title="ui.undo" aria-label="Undo">↶</button>
       <button id="btnEnd" class="primary" data-i18n="ui.startInvasion">START INVASION ▸</button>
     </div>
@@ -130,7 +130,7 @@
 
     <section class="panel grow" id="panelLog" data-group="log">
       <h2 data-i18n="ui.panelLog">Log</h2>
-      <div id="log" class="log"></div>
+      <div id="log" class="log" role="log" aria-live="polite"></div>
     </section>
   </aside>
 
