@@ -238,3 +238,10 @@ repeticions per tipus i sis en total, amb un sostre de 18 veus simultànies.
   en un mòbil.
 - El nucli s'esquerda i canvia de color a mesura que perd integritat, i les entrades són
   vòrtexs giratoris en comptes de marques planes.
+
+## Llicència
+
+[MIT](LICENSE) — pots fer-ne el que vulguis, només cal que en mantinguis l'avís de
+copyright. Les fonts Orbitron i Rajdhani es carreguen de Google Fonts i tenen la seva
+pròpia llicència (SIL Open Font License).
+
