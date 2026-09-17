@@ -959,6 +959,19 @@ function drawEnemies(ctx, g, view, time) {
         ctx.beginPath(); ctx.arc(0, 0, r * 0.24, 0, Math.PI * 2); ctx.fill();
       }
     }
+    if (def.healer) {
+      ctx.strokeStyle = '#e5fff0'; ctx.lineWidth = 1.6;
+      ctx.beginPath(); ctx.arc(0, 0, r * 1.45, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(-r * 0.55, 0); ctx.lineTo(r * 0.55, 0); ctx.moveTo(0, -r * 0.55); ctx.lineTo(0, r * 0.55); ctx.stroke();
+    }
+    if (def.frontShield) {
+      ctx.strokeStyle = '#f2d9ff'; ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.arc(0, 0, r * 1.45, -Math.PI * 0.7, Math.PI * 0.7); ctx.stroke();
+    }
+    if (def.excavator) {
+      ctx.strokeStyle = '#ffe0b5'; ctx.lineWidth = 1.6;
+      poly(ctx, 0, 0, r * 1.35, 4, Math.PI / 4); ctx.stroke();
+    }
     ctx.restore();
 
     // efectes d'estat

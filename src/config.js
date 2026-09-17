@@ -298,6 +298,18 @@ export const ENEMIES = {
     cat: 'shift', hp: 58, speed: 1, armor: 2, leak: 2, scrap: 13,
     shifter: true, color: '#a06bff',
   },
+  sanador: {
+    cat: 'basic', hp: 52, speed: 0.8, armor: 1, leak: 2, scrap: 12,
+    healer: { radius: 2.2, amount: 4 }, color: '#75f0a0',
+  },
+  escut: {
+    cat: 'armor', hp: 58, speed: 0.9, armor: 2, leak: 2, scrap: 12,
+    frontShield: 10, color: '#d8a9ff',
+  },
+  excavador: {
+    cat: 'basic', hp: 48, speed: 1.2, armor: 1, leak: 2, scrap: 10,
+    excavator: true, color: '#c98b5a',
+  },
   colos: {
     cat: 'armor', hp: 900, speed: 0.5, armor: 10, leak: 5, scrap: 90,
     boss: true, spawns: { type: 'rastrejador', every: 4, n: 2 }, color: '#ff4444',
@@ -322,13 +334,16 @@ export const WAVES = [
     { t: 0, e: 'volador', n: 6, gap: 2 }, { t: 5, e: 'rastrejador', n: 10, gap: 1 },
     { t: 12, e: 'volador', n: 5, gap: 2 }] },
   { hpMul: 2.20, groups: [
-    { t: 0, e: 'divisor', n: 8, gap: 2 }, { t: 8, e: 'blindat', n: 5, gap: 2 },
+    { t: 0, e: 'divisor', n: 8, gap: 2 }, { t: 6, e: 'sanador', n: 2, gap: 3 },
+    { t: 8, e: 'blindat', n: 5, gap: 2 },
     { t: 14, e: 'corredor', n: 8, gap: 1 }] },
   { hpMul: 2.60, groups: [
-    { t: 0, e: 'alterador', n: 4, gap: 4 }, { t: 4, e: 'volador', n: 7, gap: 2 },
+    { t: 0, e: 'alterador', n: 4, gap: 4 }, { t: 4, e: 'escut', n: 4, gap: 2 },
+    { t: 6, e: 'volador', n: 7, gap: 2 },
     { t: 10, e: 'divisor', n: 7, gap: 2 }] },
   { hpMul: 3.10, groups: [
-    { t: 0, e: 'blindat', n: 8, gap: 2 }, { t: 6, e: 'corredor', n: 10, gap: 1 },
+    { t: 0, e: 'blindat', n: 8, gap: 2 }, { t: 4, e: 'excavador', n: 5, gap: 2 },
+    { t: 6, e: 'corredor', n: 10, gap: 1 },
     { t: 14, e: 'alterador', n: 4, gap: 3 }] },
   { hpMul: 3.70, groups: [
     { t: 0, e: 'volador', n: 10, gap: 1 }, { t: 5, e: 'divisor', n: 9, gap: 2 },

@@ -131,6 +131,7 @@ node tools/test-wave-report.mjs # comprova l'informe de cada onada
 node tools/test-maps.mjs       # comprova els quatre arquetips de mapa
 node tools/test-coverage.mjs   # comprova els avisos de cobertura
 node tools/test-undo.mjs       # comprova el desfer de planificació
+node tools/test-enemies.mjs    # comprova Sanador, Escut i Excavador
 ```
 
 Cada llavor tria un arquetip de mapa: obert, canó, laberint o espiral. Tots mantenen un
@@ -138,6 +139,9 @@ camí garantit des de cada entrada fins al nucli.
 
 La previsualització de la propera onada avisa si les defenses actuals no poden respondre
 a Voladors, Blindats, Divisors o Alteradors.
+
+Les onades avançades també poden portar un **Sanador**, un **Escut frontal** o un
+**Excavador**: prioritats noves que obliguen a llegir la formació enemiga abans de disparar.
 
 Durant la planificació, el botó ↶ i `Ctrl+Z` desfan l’última acció vàlida. En començar la
 invasió, la instantània es descarta.

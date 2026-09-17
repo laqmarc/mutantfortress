@@ -26,8 +26,8 @@ infinit perquè dona més vida al bucle de joc i aprofita el sistema de puntuaci
   Blindats, Divisors i Alteradors, amb prova específica.
 7. **Desfer accions de planificació** — ✅ botó i `Ctrl+Z` recuperen l’última instantània
   vàlida; queda desactivat durant la invasió.
-8. **Més tipus d'enemic** — incorporar Sanador, Escut frontal i Excavador amb proves de
-  combat específiques.
+8. **Més tipus d'enemic** — ✅ Sanador, Escut frontal i Excavador incorporats en onades
+  avançades, amb proves de combat específiques.
 9. **Accessibilitat** — revisar contrast, focus de teclat, etiquetes ARIA, mida de text i
   dependència dels colors.
 10. **Resum de partida** — donar puntuació, estadístiques, mutacions descobertes i

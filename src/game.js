@@ -488,6 +488,7 @@ function spawnEnemy(g, type, at, hpMul) {
     x: at.x, y: at.y, px: at.x, py: at.y,
     acc: 0, pref: randomRoutePref(g.rng),
     slow: 0, slowAmt: 1, root: 0, stun: 0, burn: 0, burnDmg: 0,
+    shield: def.frontShield || 0, excavated: false,
     shiftCd: 3, spawnCd: def.spawns ? def.spawns.every : 0,
     flash: 0, alive: true,
   };
@@ -501,6 +502,11 @@ export function isFlying(g, e) { return !!enemyDef(e).flying && !g.modifiers.gro
 function damageEnemy(g, e, amount, opts = {}) {
   const def = enemyDef(e);
   let dmg = amount;
+  if (def.frontShield && e.shield > 0) {
+    e.shield = 0;
+    if (dmg <= def.frontShield) return 0;
+    dmg -= def.frontShield;
+  }
   if (!opts.pierce) dmg = Math.max(1, dmg - def.armor);
   if (opts.bonusVsSlowed && e.slow > 0) dmg *= opts.bonusVsSlowed;
   dmg = Math.round(dmg);
@@ -600,6 +606,30 @@ function enemyAbilities(g) {
   for (const e of g.enemies) {
     if (!e.alive) continue;
     const def = enemyDef(e);
+
+    if (def.healer) {
+      for (const other of g.enemies) {
+        if (!other.alive || other.id === e.id) continue;
+        if (Math.hypot(other.x - e.x, other.y - e.y) > def.healer.radius) continue;
+        other.hp = Math.min(other.maxHp, other.hp + def.healer.amount);
+      }
+    }
+
+    if (def.excavator && !e.excavated) {
+      const candidates = [];
+      for (let dy = -2; dy <= 2; dy++) for (let dx = -2; dx <= 2; dx++) {
+        const x = Math.round(e.x) + dx, y = Math.round(e.y) + dy;
+        if (inBounds(x, y) && cellAt(g, x, y).t === 'rock') candidates.push({ x, y });
+      }
+      if (candidates.length) {
+        candidates.sort((a, b) => Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y));
+        const rock = candidates[0];
+        cellAt(g, rock.x, rock.y).t = 'open';
+        g.field = recomputeField(g);
+        e.excavated = true;
+        g.fx.hits.push({ x: rock.x, y: rock.y, r: 1.1, color: def.color, life: 1 });
+      }
+    }
 
     if (def.shifter) {
       if (--e.shiftCd <= 0) {
@@ -783,6 +813,10 @@ export function invasionTick(g) {
   g.fx.shots.length = 0;
   g.fx.hits.length = 0;
   g.fx.sounds.length = 0;
+
+  for (const e of g.enemies) {
+    if (e.alive && enemyDef(e).frontShield) e.shield = enemyDef(e).frontShield;
+  }
 
   const w = waveAt(g.wave);
   // 1 · entren els enemics programats
