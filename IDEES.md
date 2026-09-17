@@ -14,11 +14,12 @@ infinit perquè dona més vida al bucle de joc i aprofita el sistema de puntuaci
 
 1. **Mode infinit** — ✅ motor, desat i selector inicial fets; pendent ajustar la puntuació
   i el balanç amb partides llargues.
-2. **Nivells de dificultat** — oferir tres corbes de dificultat i validar-les amb el
-  simulador abans d'exposar-les al jugador.
-3. **Informe de final d'onada** — mostrar dany per torre, fuites i categories eliminades.
-4. **Tutorial contextual** — ensenyar construcció, rutes, mutacions i fusions durant la
-  primera onada, en lloc de confiar només en el modal inicial.
+2. **Nivells de dificultat** — ✅ selector, motor i desat fets; pendent calibrar les tres
+  corbes amb simulacions més llargues.
+3. **Informe de final d'onada** — ✅ mostra dany per torre, fuites, categories eliminades
+  i durada; també queda inclòs en el desat.
+4. **Tutorial contextual** — ✅ ajuda inferior contextual per construir, observar rutes i
+  arribar a la primera mutació; pendent afegir una guia específica de fusions.
 5. **Arquetips de mapa** — afegir mapes de canó, espiral, laberint i camp obert a partir
   de la llavor existent.
 6. **Avís de cobertura** — detectar abans de cada onada si falta resposta contra Voladors,

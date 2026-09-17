@@ -14,6 +14,16 @@ export const START = {
   maxEnergy: 8,
 };
 
+export const DIFFICULTIES = {
+  easy: { label: 'difficulty.easy', core: 24, scrap: 110, hp: 0.82, count: 0.85 },
+  normal: { label: 'difficulty.normal', core: 20, scrap: 95, hp: 1, count: 1 },
+  hard: { label: 'difficulty.hard', core: 16, scrap: 85, hp: 1.22, count: 1.15 },
+};
+
+export function difficultyAt(key) {
+  return DIFFICULTIES[key] || DIFFICULTIES.normal;
+}
+
 // Cost en energia de les accions de planificació
 export const COST = {
   build: 1,

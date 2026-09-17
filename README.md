@@ -14,6 +14,12 @@ Des del menú inicial també es pot triar el **mode infinit**: després de la de
 les invasions continuen amb més vida i més enemics, i la partida només acaba quan cau el
 nucli.
 
+També hi ha tres dificultats: **Fàcil** dona més nucli i redueix la pressió, **Normal** és
+el balanç de referència, i **Difícil** redueix el nucli i reforça les onades.
+
+Durant les primeres accions, l’ajuda inferior guia el jugador de manera contextual:
+construir una defensa, observar les rutes i arribar a la primera mutació.
+
 ## Com jugar-hi
 
 ```bash
@@ -114,11 +120,14 @@ simular sense navegador.
 ## Balanç
 
 ```bash
-node tools/balance.mjs 40      # 40 partides senceres amb una IA bàsica
+node tools/balance.mjs 40      # 40 partides normals amb una IA bàsica
+node tools/balance.mjs 40 hard # compara també una dificultat concreta
 node tools/test-mutation.mjs   # proves de la mecànica de mutació
 node tools/test-routes.mjs     # comprova que cap enemic camini fora de les línies
 node tools/test-towers.mjs     # cobertura de l'arbre de fusions i sistema de millores
 node tools/test-endless.mjs    # comprova el mode infinit i el seu desat
+node tools/test-difficulty.mjs # comprova les tres dificultats i el seu desat
+node tools/test-wave-report.mjs # comprova l'informe de cada onada
 ```
 
 Juga N partides senceres amb una IA bàsica i treu la taxa de victòries, les mutacions per

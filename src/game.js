@@ -1,7 +1,7 @@
 // Motor de joc: estat, accions de planificació i resolució de la invasió
 import {
   GRID_W, GRID_H, START, COST, TRANSFORM_SCRAP, FUSE_SCRAP, EMERGENCY_MULT,
-  MUTATE_KILLS, TOWERS, ENEMIES, WAVE_COUNT, waveAt, EVENTS, MUTATION_BY_PROFILE, FUSIONS, UPGRADE,
+  MUTATE_KILLS, TOWERS, ENEMIES, WAVE_COUNT, waveAt, difficultyAt, EVENTS, MUTATION_BY_PROFILE, FUSIONS, UPGRADE,
 } from './config.js';
 import {
   mulberry32, idx, inBounds, coreRect, coreCenter, isCoreCell, generateTerrain,
@@ -18,20 +18,24 @@ export function createGame(seed, options = {}) {
   const rng = mulberry32(s);
   const core = coreRect();
   const spawns = defaultSpawns();
+  const difficulty = difficultyAt(options.difficulty);
+  const difficultyKey = ['easy', 'normal', 'hard'].includes(options.difficulty)
+    ? options.difficulty : 'normal';
   const cells = generateTerrain(rng, core, spawns);
 
   const g = {
     seed: s,
     endless: !!options.endless,
+    difficulty: difficultyKey,
     rng,
     cells,
     core,
     spawns,
-    coreHp: START.core,
-    coreMax: START.core,
+    coreHp: difficulty.core,
+    coreMax: difficulty.core,
     energy: START.energy,
     maxEnergy: START.maxEnergy,
-    scrap: START.scrap,
+    scrap: difficulty.scrap,
     towers: new Map(),
     enemies: [],
     wave: 0,                 // onada completada; la següent és wave+1
@@ -45,6 +49,8 @@ export function createGame(seed, options = {}) {
     log: [],
     fx: { shots: [], hits: [], floats: [], shakes: 0, sounds: [] },
     stats: { kills: 0, leaked: 0, mutations: 0, fusions: 0, built: 0, upgrades: 0 },
+    waveReport: null,
+    lastWaveReport: null,
   };
   g.field = recomputeField(g);
   logMsg(g, 'log.boot', null, 'good');
@@ -438,16 +444,26 @@ function openScheduledBreach(g) {
 
 export function startInvasion(g) {
   const w = waveAt(g.wave);
+  const difficulty = difficultyAt(g.difficulty);
   g.phase = 'invasion';
   g.tick = 0;
   g.queue = [];
+  g.waveReport = {
+    wave: g.wave + 1,
+    duration: 0,
+    damageByTower: {},
+    killsByCategory: {},
+    leakedByType: {},
+  };
   let spawnRot = 0;
   for (const grp of w.groups) {
-    for (let i = 0; i < grp.n; i++) {
+    const count = Math.max(1, Math.round(grp.n * difficulty.count));
+    for (let i = 0; i < count; i++) {
       g.queue.push({
         t: grp.t + i * grp.gap,
         e: grp.e,
         spawn: g.spawns[spawnRot++ % g.spawns.length],
+        hpMul: w.hpMul * difficulty.hp,
       });
     }
   }
@@ -486,6 +502,13 @@ function damageEnemy(g, e, amount, opts = {}) {
   if (opts.bonusVsSlowed && e.slow > 0) dmg *= opts.bonusVsSlowed;
   dmg = Math.round(dmg);
   e.hp -= dmg;
+  if (opts.tower && g.waveReport) {
+    const id = String(opts.tower.id);
+    const row = g.waveReport.damageByTower[id] || { key: opts.tower.key, damage: 0 };
+    row.key = opts.tower.key;
+    row.damage += dmg;
+    g.waveReport.damageByTower[id] = row;
+  }
   e.flash = 1;
   g.fx.floats.push({ x: e.x, y: e.y, text: `${dmg}`, kind: opts.pierce ? 'pierce' : 'dmg', life: 1 });
   if (e.hp <= 0) killEnemy(g, e, opts);
@@ -498,6 +521,9 @@ function killEnemy(g, e, opts = {}) {
   const def = enemyDef(e);
   g.scrap += def.scrap;
   g.stats.kills++;
+  if (g.waveReport) {
+    g.waveReport.killsByCategory[def.cat] = (g.waveReport.killsByCategory[def.cat] || 0) + 1;
+  }
   g.fx.hits.push({ x: e.x, y: e.y, r: def.boss ? 3 : 1, color: def.color, life: 1 });
   g.fx.sounds.push(def.boss || def.armor >= 6 ? 'killBig' : 'kill');
 
@@ -522,6 +548,9 @@ function leakEnemy(g, e) {
   e.alive = false;
   g.coreHp -= def.leak;
   g.stats.leaked++;
+  if (g.waveReport) {
+    g.waveReport.leakedByType[e.type] = (g.waveReport.leakedByType[e.type] || 0) + 1;
+  }
   g.fx.shakes = Math.max(g.fx.shakes, def.boss ? 1 : 0.6);
   g.fx.sounds.push('leak');
   g.fx.floats.push({ x: e.x, y: e.y, text: `−${def.leak}`, kind: 'leak', life: 1.4 });
@@ -756,7 +785,7 @@ export function invasionTick(g) {
   // 1 · entren els enemics programats
   while (g.queue.length && g.queue[0].t <= g.tick) {
     const s = g.queue.shift();
-    spawnEnemy(g, s.e, s.spawn, w.hpMul);
+    spawnEnemy(g, s.e, s.spawn, s.hpMul);
   }
   // 2 · avancen
   moveEnemies(g);
@@ -780,6 +809,10 @@ export function invasionTick(g) {
 }
 
 function endWave(g) {
+  if (g.waveReport) {
+    g.waveReport.duration = g.tick;
+    g.lastWaveReport = g.waveReport;
+  }
   g.wave++;
   const bonus = 20 + g.wave * 8;
   g.scrap += bonus;

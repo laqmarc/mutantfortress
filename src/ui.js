@@ -1,7 +1,7 @@
 // Interfície DOM: paleta, inspector, esdeveniments, registre i modals.
 // Cap text literal: tot passa per i18n.js.
 import {
-  TOWERS, ENEMIES, EVENTS, BASE_TOWERS, WAVE_COUNT, waveAt, COST, TRANSFORM_SCRAP, FUSE_SCRAP,
+  TOWERS, ENEMIES, EVENTS, BASE_TOWERS, DIFFICULTIES, WAVE_COUNT, waveAt, COST, TRANSFORM_SCRAP, FUSE_SCRAP,
   MUTATE_KILLS, EMERGENCY_MULT, UPGRADE,
 } from './config.js';
 import {
@@ -295,6 +295,39 @@ export function renderWavePreview(g) {
     + `<div class="hint" style="margin-top:7px">${t('wavePrev.hpMul', { n: w.hpMul.toFixed(2) })}</div>`;
 }
 
+export function renderWaveReport(g) {
+  const panel = $('reportPanel');
+  const el = $('waveReport');
+  const report = g.lastWaveReport;
+  if (!report) {
+    panel.classList.add('hidden');
+    el.innerHTML = t('report.none');
+    return;
+  }
+
+  panel.classList.remove('hidden');
+  const damage = Object.values(report.damageByTower).sort((a, b) => b.damage - a.damage);
+  const kills = Object.entries(report.killsByCategory).sort((a, b) => b[1] - a[1]);
+  const leaks = Object.entries(report.leakedByType).sort((a, b) => b[1] - a[1]);
+  const totalKills = kills.reduce((sum, [, n]) => sum + n, 0);
+  const totalLeaks = leaks.reduce((sum, [, n]) => sum + n, 0);
+  const damageHtml = damage.length
+    ? damage.map((row) => `<div>${towerName(row.key)} <b>${row.damage}</b></div>`).join('')
+    : `<div>${t('report.none')}</div>`;
+  const killsHtml = kills.length
+    ? kills.map(([cat, n]) => `<div>${t(`report.cat.${cat}`)} <b>×${n}</b></div>`).join('')
+    : `<div>${t('report.none')}</div>`;
+  const leaksHtml = leaks.length
+    ? leaks.map(([type, n]) => `<div>${enemyName(type)} <b>×${n}</b></div>`).join('')
+    : `<div>${t('report.none')}</div>`;
+
+  el.innerHTML = `
+    <div>${t('report.ticks')} <b>${report.duration}</b> · ${t('report.kills')} <b>${totalKills}</b> · ${t('report.leaks')} <b>${totalLeaks}</b></div>
+    <div style="margin-top:8px"><b>${t('report.damage')}</b>${damageHtml}</div>
+    <div style="margin-top:8px"><b>${t('report.categories')}</b>${killsHtml}</div>
+    <div style="margin-top:8px"><b>${t('report.leaks')}</b>${leaksHtml}</div>`;
+}
+
 /** Els registres es guarden com a clau + paràmetres i es tradueixen aquí. */
 function formatLog(l) {
   const p = { ...(l.params || {}) };
@@ -431,6 +464,10 @@ export function introHtml(resumeWave = null) {
   </div>
   <p style="margin-top:16px">${t('modal.goal')}</p>
   <p class="hint">${t('modal.endlessGoal')}</p>
+  <label class="hint" for="difficultySelect">${t('modal.difficulty')}</label>
+  <select id="difficultySelect" data-difficulty>
+    ${Object.entries(DIFFICULTIES).map(([key, d]) => `<option value="${key}"${key === 'normal' ? ' selected' : ''}>${t(d.label)}</option>`).join('')}
+  </select>
   <div class="actions">
     ${resumeWave != null
       ? `<button class="primary" data-resume>${t('modal.resume', { n: resumeWave + 1 })}</button>

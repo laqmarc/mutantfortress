@@ -1,7 +1,7 @@
 // Simulador sense navegador: juga partides amb una IA senzilla per validar
 // que les 10 onades es resolen i que el balanç és raonable.
-//   node tools/balance.mjs [nPartides]
-import { WAVES, TOWERS, BASE_TOWERS, COST, GRID_W, GRID_H } from '../src/config.js';
+//   node tools/balance.mjs [nPartides] [dificultat]
+import { WAVES, TOWERS, BASE_TOWERS, COST, GRID_W, GRID_H, difficultyAt } from '../src/config.js';
 import { waveName } from '../src/i18n.js';
 import { idx, isCoreCell, allSpawnsConnected, flowField } from '../src/grid.js';
 import {
@@ -73,8 +73,8 @@ function planTurn(g) {
   }
 }
 
-function playOne(seed) {
-  const g = createGame(seed);
+function playOne(seed, difficulty) {
+  const g = createGame(seed, { difficulty });
   const perWave = [];
   startPlanning(g);
   let guard = 0;
@@ -96,6 +96,7 @@ function playOne(seed) {
 }
 
 const N = Number(process.argv[2] || 12);
+const difficulty = ['easy', 'normal', 'hard'].includes(process.argv[3]) ? process.argv[3] : 'normal';
 let wins = 0;
 const coreEnd = [];
 const detail = [];
@@ -104,7 +105,7 @@ for (let i = 0; i < N; i++) {
   const seed = 1000 + i * 7919;
   let r;
   try {
-    r = playOne(seed);
+    r = playOne(seed, difficulty);
   } catch (e) {
     console.error(`✗ llavor ${seed}: ${e.message}`);
     continue;
@@ -116,9 +117,10 @@ for (let i = 0; i < N; i++) {
 
 const avg = (a) => (a.reduce((x, y) => x + y, 0) / a.length);
 
-console.log(`\n═══ FORTALESA MUTANT · ${N} partides (IA bàsica) ═══`);
+const maxCore = difficultyAt(difficulty).core;
+console.log(`\n═══ FORTALESA MUTANT · ${N} partides · ${difficulty} (IA bàsica) ═══`);
 console.log(`Victòries:        ${wins}/${N}  (${Math.round((wins / N) * 100)}%)`);
-console.log(`Nucli restant:    mitjana ${avg(coreEnd).toFixed(1)} / 20  (mín ${Math.min(...coreEnd)}, màx ${Math.max(...coreEnd)})`);
+console.log(`Nucli restant:    mitjana ${avg(coreEnd).toFixed(1)} / ${maxCore}  (mín ${Math.min(...coreEnd)}, màx ${Math.max(...coreEnd)})`);
 console.log(`Baixes:           ${avg(detail.map((d) => d.kills)).toFixed(0)}`);
 console.log(`Mutacions:        ${avg(detail.map((d) => d.mutations)).toFixed(1)}`);
 console.log(`Fusions:          ${avg(detail.map((d) => d.fusions)).toFixed(1)}`);
@@ -128,7 +130,7 @@ console.log(`\nDany al nucli per onada (mitjana de les ${N} partides):`);
 for (let w = 0; w < WAVES.length; w++) {
   const rows = detail.map((d) => d.perWave[w]).filter(Boolean);
   if (!rows.length) { console.log(`  ${String(w + 1).padStart(2)}. ${waveName(w).padEnd(12)} —`); continue; }
-  const lost = avg(rows.map((r) => r.lost));
+  const lost = Math.max(0, avg(rows.map((r) => r.lost)));
   const ticks = avg(rows.map((r) => r.ticks));
   const bar = '█'.repeat(Math.round(lost * 2)) || '·';
   console.log(`  ${String(w + 1).padStart(2)}. ${waveName(w).padEnd(12)} −${lost.toFixed(1)} nucli  ${String(Math.round(ticks)).padStart(3)} tics  ${bar}`);

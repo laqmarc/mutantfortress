@@ -148,7 +148,8 @@ function enterPlanning(fromSave = false) {
   if (g.pendingEvent) audio.sfx('event');
   if (!fromSave) autosave();
   refreshAll();
-  UI.setHint('ui.planningHint', { n: g.energy });
+  const hint = tutorialHint() || { key: 'ui.planningHint', params: { n: g.energy } };
+  UI.setHint(hint.key, hint.params);
   schedule();
 }
 
@@ -162,8 +163,20 @@ function enterInvasion() {
   audio.sfx('waveStart');
   audio.startMusic('invasion', g.wave);
   refreshAll();
-  UI.setHint('ui.invasionHint', { n: EMERGENCY_MULT });
+  const hint = tutorialHint() || { key: 'ui.invasionHint', params: { n: EMERGENCY_MULT } };
+  UI.setHint(hint.key, hint.params);
   schedule();
+}
+
+function tutorialHint() {
+  if (g.stats.mutations > 0) return null;
+  if (!g.towers.size) return { key: 'tutorial.build' };
+  if (g.phase === 'invasion' && g.wave === 0) return { key: 'tutorial.invasion' };
+  const kills = Math.max(...[...g.towers.values()].map((tower) => tower.totalKills), 0);
+  if ([...g.towers.values()].some((tower) => tower.totalKills >= MUTATE_KILLS)) {
+    return { key: 'tutorial.mutate', params: { n: MUTATE_KILLS } };
+  }
+  return { key: 'tutorial.progress', params: { n: kills, total: MUTATE_KILLS } };
 }
 
 function endGame(won) {
@@ -220,6 +233,7 @@ function refreshAll() {
   UI.renderInspector(g, view, onAction);
   UI.renderEvent(g);
   UI.renderWavePreview(g);
+  UI.renderWaveReport(g);
   UI.renderLog(g);
 }
 
@@ -602,9 +616,10 @@ async function boot() {
   UI.showModal(UI.introHtml(resumable ? resumable.wave : null));
 
   const close = document.querySelector('[data-close]');
-  if (close) close.onclick = () => newGame();
+  const selectedDifficulty = () => document.querySelector('[data-difficulty]')?.value || 'normal';
+  if (close) close.onclick = () => newGame(undefined, false, selectedDifficulty());
   const endless = document.querySelector('[data-endless]');
-  if (endless) endless.onclick = () => newGame(undefined, true);
+  if (endless) endless.onclick = () => newGame(undefined, true, selectedDifficulty());
   const res = document.querySelector('[data-resume]');
   if (res) {
     res.onclick = () => {
