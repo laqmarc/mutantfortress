@@ -6,6 +6,7 @@ import {
 import {
   mulberry32, idx, inBounds, coreRect, coreCenter, isCoreCell, generateTerrain,
   defaultSpawns, SCHEDULED_BREACHES, flowField, nextStep, allSpawnsConnected, nearestFree,
+  ROUTE_PREFS, randomRoutePref,
 } from './grid.js';
 
 let nextId = 1;
@@ -430,7 +431,7 @@ function spawnEnemy(g, type, at, hpMul) {
     id: uid(), type, cat: def.cat,
     hp, maxHp: hp,
     x: at.x, y: at.y, px: at.x, py: at.y,
-    acc: 0, pref: Math.floor(g.rng() * 8),
+    acc: 0, pref: randomRoutePref(g.rng),
     slow: 0, slowAmt: 1, root: 0, stun: 0, burn: 0, burnDmg: 0,
     shiftCd: 3, spawnCd: def.spawns ? def.spawns.every : 0,
     flash: 0, alive: true,
@@ -475,7 +476,7 @@ function killEnemy(g, e, opts = {}) {
   if (def.split && !opts.noSplit) {
     for (let i = 0; i < def.split.n; i++) {
       const c = spawnEnemy(g, def.split.type, { x: e.x, y: e.y }, 1);
-      c.pref = (e.pref + i + 1) % 8;
+      c.pref = ROUTE_PREFS[(ROUTE_PREFS.indexOf(e.pref) + i + 1) % ROUTE_PREFS.length];
     }
   }
 }
@@ -496,6 +497,7 @@ function moveEnemies(g) {
   for (const e of g.enemies) {
     if (!e.alive) continue;
     e.px = e.x; e.py = e.y;
+    e.path = null;                 // caselles realment trepitjades aquest tic
     if (e.stun > 0 || e.root > 0) continue;
 
     const def = enemyDef(e);
@@ -519,6 +521,7 @@ function moveEnemies(g) {
       const n = nextStep(g.field, Math.round(e.x), Math.round(e.y), e.pref);
       if (!n) break;
       e.x = n.x; e.y = n.y;
+      (e.path || (e.path = [])).push({ x: n.x, y: n.y });
       if (isCoreCell(g.core, e.x, e.y)) { leakEnemy(g, e); break; }
     }
   }
@@ -564,7 +567,7 @@ function enemyAbilities(g) {
       e.spawnCd = def.spawns.every;
       for (let i = 0; i < def.spawns.n; i++) {
         const c = spawnEnemy(g, def.spawns.type, { x: Math.round(e.x), y: Math.round(e.y) }, 1);
-        c.pref = Math.floor(g.rng() * 8);
+        c.pref = randomRoutePref(g.rng);
       }
       g.fx.hits.push({ x: e.x, y: e.y, r: 1.5, color: '#ff8888', life: 1 });
     }

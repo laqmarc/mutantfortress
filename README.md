@@ -92,6 +92,7 @@ simular sense navegador.
 ```bash
 node tools/balance.mjs 40      # 40 partides senceres amb una IA bàsica
 node tools/test-mutation.mjs   # proves de la mecànica de mutació
+node tools/test-routes.mjs     # comprova que cap enemic camini fora de les línies
 ```
 
 Juga N partides senceres amb una IA bàsica i treu la taxa de victòries, les mutacions per

@@ -4,7 +4,7 @@
 // El bloom es fa reduint el fotograma a la meitat i tornant-lo a compondre desenfocat
 // en mode «lighter»: com que el fons és molt fosc, només hi guanyen els neons.
 import { GRID_W, GRID_H, CELL, TOWERS, ENEMIES } from './config.js';
-import { idx, tracePath, flowField } from './grid.js';
+import { idx, tracePath, flowField, ROUTE_PREFS } from './grid.js';
 import { towerStats, isFlying } from './game.js';
 import { cam, BOARD_W, BOARD_H, resize as camResize } from './camera.js';
 import * as fx from './fx.js';
@@ -78,6 +78,24 @@ export function getContext(canvas) {
 const cx = (x) => x * CELL + CELL / 2;
 const cy = (y) => y * CELL + CELL / 2;
 const lerp = (a, b, t) => a + (b - a) * t;
+
+/**
+ * Posició interpolada d'un enemic dins del tic. Els que es mouen més d'una
+ * casella per tic (Corredors, Esquirles) han de recórrer la polilínia de
+ * caselles que han trepitjat de debò; si s'interpolés en recta, retallarien
+ * les cantonades i semblaria que travessen la runa.
+ */
+function enemyPos(e, a) {
+  const pts = e.path;
+  if (!pts || pts.length < 2) return { x: lerp(e.px, e.x, a), y: lerp(e.py, e.y, a) };
+  const segs = pts.length;
+  const t = Math.min(segs, a * segs);
+  const i = Math.min(segs - 1, Math.floor(t));
+  const f = t - i;
+  const from = i === 0 ? { x: e.px, y: e.py } : pts[i - 1];
+  const to = pts[i];
+  return { x: lerp(from.x, to.x, f), y: lerp(from.y, to.y, f) };
+}
 const font = (size, weight = 'bold') =>
   `${weight} ${(size * K).toFixed(1)}px Rajdhani, system-ui, sans-serif`;
 
@@ -367,8 +385,13 @@ function drawCells(ctx, g, time) {
   }
 }
 
+/**
+ * Dibuixa TOTES les rutes que pot agafar un enemic terrestre, no una mostra.
+ * Les vuit preferències de desempat solen col·lapsar en 2 o 3 recorreguts
+ * diferents, així que deduplicant-les el tauler queda net i, sobretot, honest:
+ * no hi ha cap enemic que camini per on no hi ha línia.
+ */
 function drawPaths(ctx, g, time) {
-  const prefs = [0, 2, 5];
   const colors = ['rgba(255,110,190,0.5)', 'rgba(120,220,255,0.45)', 'rgba(255,215,110,0.4)'];
   ctx.save();
   ctx.lineWidth = 3 * Math.max(1, K * 0.7);
@@ -377,15 +400,21 @@ function drawPaths(ctx, g, time) {
   ctx.setLineDash([10, 10]);
   ctx.lineDashOffset = -(time * 0.035) % 20;
   for (const s of g.spawns) {
-    prefs.forEach((p, pi) => {
+    const vistes = new Set();
+    let i = 0;
+    for (const p of ROUTE_PREFS) {
       const pts = tracePath(g.field, s, p);
-      if (pts.length < 2) return;
-      ctx.strokeStyle = colors[pi % colors.length];
-      ctx.globalAlpha = 0.9 - pi * 0.24;
+      if (pts.length < 2) continue;
+      const clau = pts.map((q) => `${q.x},${q.y}`).join(';');
+      if (vistes.has(clau)) continue;          // aquesta ruta ja està pintada
+      vistes.add(clau);
+      ctx.strokeStyle = colors[i % colors.length];
+      ctx.globalAlpha = Math.max(0.35, 0.9 - i * 0.16);
+      i++;
       ctx.beginPath();
-      pts.forEach((pt, i) => (i ? ctx.lineTo(cx(pt.x), cy(pt.y)) : ctx.moveTo(cx(pt.x), cy(pt.y))));
+      pts.forEach((pt, j) => (j ? ctx.lineTo(cx(pt.x), cy(pt.y)) : ctx.moveTo(cx(pt.x), cy(pt.y))));
       ctx.stroke();
-    });
+    }
   }
   ctx.restore();
 }
@@ -801,7 +830,7 @@ function enemyTrails(g, view, dt) {
     const def = ENEMIES[e.type];
     if (def.speed < 1.5 && !def.flying && !def.boss) continue;
     if (Math.random() > dt * 22) continue;
-    const ex = lerp(e.px, e.x, a), ey = lerp(e.py, e.y, a);
+    const p = enemyPos(e, a); const ex = p.x, ey = p.y;
     fx.trail(cx(ex), cy(ey), def.color, def.boss ? 7 : 3);
   }
 }
@@ -810,7 +839,7 @@ function drawEnemies(ctx, g, view, time) {
   const a = view.tickAlpha;
   for (const e of g.enemies) {
     const def = ENEMIES[e.type];
-    const ex = lerp(e.px, e.x, a), ey = lerp(e.py, e.y, a);
+    const p = enemyPos(e, a); const ex = p.x, ey = p.y;
     const px = cx(ex), py = cy(ey);
     const flying = isFlying(g, e);
     const r = CELL * (def.boss ? 0.55 : def.small ? 0.2 : 0.28);
@@ -922,7 +951,7 @@ function drawEnemyBars(ctx, g, view) {
   const a = view.tickAlpha;
   for (const e of g.enemies) {
     const def = ENEMIES[e.type];
-    const ex = lerp(e.px, e.x, a), ey = lerp(e.py, e.y, a);
+    const p = enemyPos(e, a); const ex = p.x, ey = p.y;
     const px = cx(ex), py = cy(ey);
     const r = CELL * (def.boss ? 0.55 : def.small ? 0.2 : 0.28);
     const flying = isFlying(g, e);

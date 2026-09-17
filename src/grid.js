@@ -137,6 +137,16 @@ export function flowField(cells, core, ghost, ignoreTowerId) {
   return { dist };
 }
 
+/**
+ * Les úniques preferències que fa servir cap enemic, i exactament les mateixes
+ * que dibuixa el renderitzador. Han de coincidir: si un enemic pogués agafar un
+ * ordre que no es pinta, el jugador estaria planificant contra línies mentideres.
+ */
+export const ROUTE_PREFS = [0, 1, 2, 3, 4, 5, 6, 7];
+
+export const randomRoutePref = (rng) =>
+  ROUTE_PREFS[Math.floor(rng() * ROUTE_PREFS.length)];
+
 /** Ordre de direccions propi de cada enemic → camins paral·lels diferents. */
 export function prefOrder(pref) {
   const base = [[0, -1], [1, 0], [0, 1], [-1, 0]];
