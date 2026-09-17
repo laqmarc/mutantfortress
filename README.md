@@ -10,6 +10,10 @@ Preparat per publicar-se com a **YouTube Playable** — vegeu [PLAYABLES.md](PLA
 
 Idiomes: anglès (per defecte) i català, commutables amb el botó EN/CA.
 
+Des del menú inicial també es pot triar el **mode infinit**: després de la desena onada
+les invasions continuen amb més vida i més enemics, i la partida només acaba quan cau el
+nucli.
+
 ## Com jugar-hi
 
 ```bash
@@ -114,6 +118,7 @@ node tools/balance.mjs 40      # 40 partides senceres amb una IA bàsica
 node tools/test-mutation.mjs   # proves de la mecànica de mutació
 node tools/test-routes.mjs     # comprova que cap enemic camini fora de les línies
 node tools/test-towers.mjs     # cobertura de l'arbre de fusions i sistema de millores
+node tools/test-endless.mjs    # comprova el mode infinit i el seu desat
 ```
 
 Juga N partides senceres amb una IA bàsica i treu la taxa de victòries, les mutacions per

@@ -7,6 +7,33 @@ Anotat el 2026-09-17, després de tenir el joc jugable amb so i preparat per a P
 > ✅ **Arbre de fusions complet** — fet: 21 parelles, 21 torres diferents.
 > ✅ **Millores de nivell** — fetes, i de passada resolen el sumider de ferralla.
 
+## Full de ruta de les deu millores
+
+Aquest és el paquet de millores que es farà de manera incremental, començant pel mode
+infinit perquè dona més vida al bucle de joc i aprofita el sistema de puntuació existent.
+
+1. **Mode infinit** — ✅ motor, desat i selector inicial fets; pendent ajustar la puntuació
+  i el balanç amb partides llargues.
+2. **Nivells de dificultat** — oferir tres corbes de dificultat i validar-les amb el
+  simulador abans d'exposar-les al jugador.
+3. **Informe de final d'onada** — mostrar dany per torre, fuites i categories eliminades.
+4. **Tutorial contextual** — ensenyar construcció, rutes, mutacions i fusions durant la
+  primera onada, en lloc de confiar només en el modal inicial.
+5. **Arquetips de mapa** — afegir mapes de canó, espiral, laberint i camp obert a partir
+  de la llavor existent.
+6. **Avís de cobertura** — detectar abans de cada onada si falta resposta contra Voladors,
+  Blindats, Divisors o altres famílies.
+7. **Desfer accions de planificació** — recuperar l'estat anterior mentre la invasió no
+  hagi començat.
+8. **Més tipus d'enemic** — incorporar Sanador, Escut frontal i Excavador amb proves de
+  combat específiques.
+9. **Accessibilitat** — revisar contrast, focus de teclat, etiquetes ARIA, mida de text i
+  dependència dels colors.
+10. **Resum de partida** — donar puntuació, estadístiques, mutacions descobertes i
+   configuració final de la ciutat a la pantalla de victòria o derrota.
+
+Cada punt s'ha d'implementar amb una prova o simulació que pugui detectar una regressió.
+
 ---
 
 ## Prioritat alta

@@ -329,6 +329,25 @@ export const WAVES = [
     { t: 20, e: 'divisor', n: 8, gap: 1 }] },
 ];
 
+export const WAVE_COUNT = WAVES.length;
+
+/** Genera onades posteriors a la campanya reutilitzant les plantilles avançades. */
+export function waveAt(index) {
+  if (index < WAVE_COUNT) return WAVES[index];
+  const endlessIndex = index - WAVE_COUNT;
+  const cycle = Math.floor(endlessIndex / 5) + 1;
+  const template = WAVES[5 + (endlessIndex % 5)];
+  const hpScale = 1.12 ** cycle;
+  const countScale = 1 + cycle * 0.12;
+  return {
+    hpMul: Number((template.hpMul * hpScale).toFixed(2)),
+    groups: template.groups.map((group) => ({
+      ...group,
+      n: Math.max(1, Math.round(group.n * countScale)),
+    })),
+  };
+}
+
 // ─────────────────────────────────────────────────────────────
 // ESDEVENIMENTS entre rondes (textos a i18n.js sota 'event.<id>.*')
 // ─────────────────────────────────────────────────────────────

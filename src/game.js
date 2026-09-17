@@ -1,7 +1,7 @@
 // Motor de joc: estat, accions de planificació i resolució de la invasió
 import {
   GRID_W, GRID_H, START, COST, TRANSFORM_SCRAP, FUSE_SCRAP, EMERGENCY_MULT,
-  MUTATE_KILLS, TOWERS, ENEMIES, WAVES, EVENTS, MUTATION_BY_PROFILE, FUSIONS, UPGRADE,
+  MUTATE_KILLS, TOWERS, ENEMIES, WAVE_COUNT, waveAt, EVENTS, MUTATION_BY_PROFILE, FUSIONS, UPGRADE,
 } from './config.js';
 import {
   mulberry32, idx, inBounds, coreRect, coreCenter, isCoreCell, generateTerrain,
@@ -12,7 +12,7 @@ import {
 let nextId = 1;
 const uid = () => nextId++;
 
-export function createGame(seed) {
+export function createGame(seed, options = {}) {
   nextId = 1;
   const s = (seed ?? Math.floor(Math.random() * 1e9)) >>> 0;
   const rng = mulberry32(s);
@@ -22,6 +22,7 @@ export function createGame(seed) {
 
   const g = {
     seed: s,
+    endless: !!options.endless,
     rng,
     cells,
     core,
@@ -419,7 +420,7 @@ export function startPlanning(g) {
   openScheduledBreach(g);
   g.pendingEvent = rollEvent(g);
   if (g.pendingEvent) applyEvent(g, g.pendingEvent);
-  logMsg(g, 'log.phasePlanning', { n: g.wave + 1, total: WAVES.length }, 'phase');
+  logMsg(g, 'log.phasePlanning', { n: g.wave + 1, total: g.endless ? '∞' : WAVE_COUNT }, 'phase');
 }
 
 /** Bretxes programades: el perímetre cedeix a les onades 4 i 7. */
@@ -436,8 +437,7 @@ function openScheduledBreach(g) {
 }
 
 export function startInvasion(g) {
-  const w = WAVES[g.wave];
-  if (!w) return;
+  const w = waveAt(g.wave);
   g.phase = 'invasion';
   g.tick = 0;
   g.queue = [];
@@ -752,7 +752,7 @@ export function invasionTick(g) {
   g.fx.hits.length = 0;
   g.fx.sounds.length = 0;
 
-  const w = WAVES[g.wave];
+  const w = waveAt(g.wave);
   // 1 · entren els enemics programats
   while (g.queue.length && g.queue[0].t <= g.tick) {
     const s = g.queue.shift();
@@ -784,7 +784,7 @@ function endWave(g) {
   const bonus = 20 + g.wave * 8;
   g.scrap += bonus;
   logMsg(g, 'log.waveCleared', { n: g.wave, bonus }, 'good');
-  if (g.wave >= WAVES.length) {
+  if (!g.endless && g.wave >= WAVE_COUNT) {
     g.phase = 'victory';
     logMsg(g, 'log.victory', null, 'good');
   } else {
@@ -793,13 +793,12 @@ function endWave(g) {
 }
 
 export function waveInfo(g) {
-  return WAVES[Math.min(g.wave, WAVES.length - 1)];
+  return waveAt(g.wave);
 }
 
 /** Composició de la propera onada, per mostrar-la a la planificació. */
 export function upcomingComposition(g) {
-  const w = WAVES[g.wave];
-  if (!w) return [];
+  const w = waveAt(g.wave);
   const map = new Map();
   for (const grp of w.groups) map.set(grp.e, (map.get(grp.e) || 0) + grp.n);
   return [...map.entries()].map(([type, n]) => ({ type, n, def: ENEMIES[type] }));

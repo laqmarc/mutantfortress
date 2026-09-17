@@ -1,6 +1,6 @@
 // Punt d'entrada: arrencada, bucle, integració amb YouTube Playables
 // i pont entre l'entrada de l'usuari i el motor de joc.
-import { TICK_MS, TOWERS, COST, EMERGENCY_MULT, WAVES, MUTATE_KILLS } from './config.js';
+import { TICK_MS, TOWERS, COST, EMERGENCY_MULT, WAVE_COUNT, MUTATE_KILLS } from './config.js';
 import { inBounds, isCoreCell, allSpawnsConnected } from './grid.js';
 import {
   createGame, startPlanning, startInvasion, invasionTick, buildTower, moveTower,
@@ -179,8 +179,8 @@ function endGame(won) {
   document.querySelector('[data-same-seed]').onclick = () => newGame(g.seed);
 }
 
-function newGame(seed) {
-  g = createGame(seed);
+function newGame(seed, endless = false) {
+  g = createGame(seed, { endless });
   fxp.reset();
   view.selected = null;
   view.cursor = { x: Math.max(0, g.core.x - 3), y: g.core.y };
@@ -201,7 +201,7 @@ function resumeGame(restored) {
   running = false;
   UI.hideModal();
   logMsg(g, 'log.saveLoaded', { n: g.wave + 1 }, 'good');
-  logMsg(g, 'log.phasePlanning', { n: g.wave + 1, total: WAVES.length }, 'phase');
+  logMsg(g, 'log.phasePlanning', { n: g.wave + 1, total: g.endless ? '∞' : WAVE_COUNT }, 'phase');
   centerOnCell(g.core.x - 2, g.core.y);
   enterPlanning(true);
 }
@@ -603,6 +603,8 @@ async function boot() {
 
   const close = document.querySelector('[data-close]');
   if (close) close.onclick = () => newGame();
+  const endless = document.querySelector('[data-endless]');
+  if (endless) endless.onclick = () => newGame(undefined, true);
   const res = document.querySelector('[data-resume]');
   if (res) {
     res.onclick = () => {

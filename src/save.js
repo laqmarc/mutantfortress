@@ -1,7 +1,7 @@
 // Serialització de la partida per al desat al núvol de Playables.
 // Es desa només als límits de fase (començament de cada planificació i final de
 // partida): és un punt de represa honest i evita haver de congelar enemics a mig vol.
-import { GRID_W, GRID_H, EVENTS, TOWERS, WAVES } from './config.js';
+import { GRID_W, GRID_H, EVENTS, TOWERS } from './config.js';
 import { mulberry32, coreRect, idx } from './grid.js';
 import { recomputeField, setNextId } from './game.js';
 
@@ -22,6 +22,7 @@ export function serialize(g, extra = {}) {
     maxEnergy: g.maxEnergy,
     scrap: g.scrap,
     wave: g.wave,
+    endless: g.endless,
     overloadUsed: g.overloadUsed,
     fog: g.modifiers.fog,
     grounded: g.modifiers.grounded,
@@ -46,7 +47,7 @@ export function restore(raw) {
 
   try {
     if (!Number.isFinite(d.seed) || !Number.isFinite(d.wave)) return null;
-    if (d.wave >= WAVES.length || d.wave < 0) return null;
+    if (d.wave < 0) return null;
     if (typeof d.terrain !== 'string' || d.terrain.length !== GRID_W * GRID_H) return null;
 
     const rng = mulberry32(d.seed);
@@ -75,6 +76,7 @@ export function restore(raw) {
       towers: new Map(),
       enemies: [],
       wave: d.wave,
+      endless: !!d.endless,
       phase: 'planning',
       tick: 0,
       queue: [],

@@ -1,7 +1,7 @@
 // Interfície DOM: paleta, inspector, esdeveniments, registre i modals.
 // Cap text literal: tot passa per i18n.js.
 import {
-  TOWERS, ENEMIES, EVENTS, BASE_TOWERS, WAVES, COST, TRANSFORM_SCRAP, FUSE_SCRAP,
+  TOWERS, ENEMIES, EVENTS, BASE_TOWERS, WAVE_COUNT, waveAt, COST, TRANSFORM_SCRAP, FUSE_SCRAP,
   MUTATE_KILLS, EMERGENCY_MULT, UPGRADE,
 } from './config.js';
 import {
@@ -58,10 +58,12 @@ export function renderTop(g) {
   bump($('resCore'), g.coreHp, lastRes.core, true);
   lastRes = { energy: g.energy, scrap: g.scrap, core: g.coreHp };
 
-  const wi = Math.min(g.wave, WAVES.length - 1);
-  $('waveVal').textContent = Math.min(g.wave + 1, WAVES.length);
-  $('waveName').textContent = waveName(wi);
-  $('waveBar').style.width = `${(g.wave / WAVES.length) * 100}%`;
+  const wi = Math.min(g.wave, WAVE_COUNT - 1);
+  $('waveVal').textContent = g.wave + 1;
+  $('waveName').textContent = g.wave >= WAVE_COUNT
+    ? t('ui.endlessWave', { n: g.wave + 1 })
+    : waveName(wi);
+  $('waveBar').style.width = `${Math.min(100, (g.wave / WAVE_COUNT) * 100)}%`;
 
   const tag = $('phaseTag');
   const inv = g.phase === 'invasion';
@@ -283,7 +285,7 @@ export function renderWavePreview(g) {
   const el = $('wavePreview');
   const comp = upcomingComposition(g);
   if (!comp.length) { el.innerHTML = '<div class="hint">—</div>'; return; }
-  const w = WAVES[g.wave];
+  const w = waveAt(g.wave);
   el.innerHTML = comp.map(({ type, n, def }) => `
     <div class="wrow" title="${enemyDesc(type)}">
       <span class="wd" style="background:${def.color};color:${def.color}"></span>
@@ -302,7 +304,11 @@ function formatLog(l) {
   if (p.a) p.a = towerName(p.a);
   if (p.b) p.b = towerName(p.b);
   if (p.enemy) p.name = enemyName(p.enemy);
-  if (p.waveIdx !== undefined) p.name = waveName(p.waveIdx);
+  if (p.waveIdx !== undefined) {
+    p.name = p.waveIdx >= WAVE_COUNT
+      ? t('ui.endlessWave', { n: p.waveIdx + 1 })
+      : waveName(p.waveIdx);
+  }
   if (p.event) {
     const ev = EVENTS.find((e) => e.id === p.event);
     p.icon = ev ? ev.icon : '';
@@ -424,11 +430,14 @@ export function introHtml(resumeWave = null) {
     </div>
   </div>
   <p style="margin-top:16px">${t('modal.goal')}</p>
+  <p class="hint">${t('modal.endlessGoal')}</p>
   <div class="actions">
     ${resumeWave != null
       ? `<button class="primary" data-resume>${t('modal.resume', { n: resumeWave + 1 })}</button>
-         <button data-close>${t('modal.newRun')}</button>`
-      : `<button class="primary" data-close>${t('modal.start')}</button>`}
+         <button data-close>${t('modal.newRun')}</button>
+         <button data-endless>${t('modal.endless')}</button>`
+      : `<button class="primary" data-close>${t('modal.start')}</button>
+         <button data-endless>${t('modal.endless')}</button>`}
   </div>`;
 }
 
