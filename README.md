@@ -133,6 +133,7 @@ node tools/test-coverage.mjs   # comprova els avisos de cobertura
 node tools/test-undo.mjs       # comprova el desfer de planificació
 node tools/test-enemies.mjs    # comprova Sanador, Escut i Excavador
 node tools/test-accessibility.mjs # comprova contractes bàsics d'accessibilitat
+node tools/test-summary.mjs      # comprova el resum final de partida
 ```
 
 Cada llavor tria un arquetip de mapa: obert, canó, laberint o espiral. Tots mantenen un
@@ -149,6 +150,9 @@ invasió, la instantània es descarta.
 
 La interfície conserva focus visible per teclat, anuncia els estats canviants als lectors
 de pantalla i redueix les animacions quan el sistema ho demana.
+
+En acabar, la pantalla final mostra la puntuació, la configuració de la partida, les
+defenses que han quedat i les mutacions descobertes.
 
 Juga N partides senceres amb una IA bàsica i treu la taxa de victòries, les mutacions per
 partida i el dany al nucli onada per onada. Serveix per detectar corbes de dificultat

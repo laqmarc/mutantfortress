@@ -490,6 +490,14 @@ export function introHtml(resumeWave = null) {
 
 export function endHtml(g, won, best = 0) {
   const score = finalScore(g);
+  const summary = finalSummary(g);
+  const difficulty = DIFFICULTIES[g.difficulty] || DIFFICULTIES.normal;
+  const mutations = summary.mutations.length
+    ? summary.mutations.map((key) => towerName(key)).join(' · ')
+    : t('end.none');
+  const towers = summary.towers.length
+    ? summary.towers.map((key) => towerName(key)).join(' · ')
+    : t('end.none');
   return `
   <h2 style="${won ? '' : '-webkit-background-clip:unset;background:none;color:var(--red)'}">
     ${t(won ? 'end.won' : 'end.lost')}</h2>
@@ -503,10 +511,24 @@ export function endHtml(g, won, best = 0) {
   <p>${t('end.score')} <b style="font-family:Orbitron;color:var(--amber);font-size:20px">${score}</b>
      · ${t('end.best', { n: Math.max(best, score) })}
      · <span class="kbd">${t('ui.seed', { seed: g.seed })}</span></p>
+  <div class="endmeta">
+    <span>${t('end.difficulty')} <b>${t(difficulty.label)}</b></span>
+    <span>${t('end.archetype')} <b>${t(`map.${g.archetype}`)}</b></span>
+  </div>
+  <div class="enddetails">
+    <div><b>${t('end.defences')}</b><span>${towers}</span></div>
+    <div><b>${t('end.discovered')}</b><span>${mutations}</span></div>
+  </div>
   <div class="actions">
     <button class="primary" data-restart>${t('end.restart')}</button>
     <button data-same-seed>${t('end.sameSeed')}</button>
   </div>`;
+}
+
+export function finalSummary(g) {
+  const towers = [...g.towers.values()].map((tower) => tower.key);
+  const mutations = [...new Set(towers.filter((key) => TOWERS[key].tier === 2))];
+  return { towers, mutations, difficulty: g.difficulty, archetype: g.archetype };
 }
 
 export function finalScore(g) {

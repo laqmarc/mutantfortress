@@ -30,8 +30,8 @@ infinit perquè dona més vida al bucle de joc i aprofita el sistema de puntuaci
   avançades, amb proves de combat específiques.
 9. **Accessibilitat** — ✅ focus visible, noms ARIA, regions dinàmiques anunciades i suport
   de moviment reduït; pendent una auditoria WCAG manual amb lector de pantalla.
-10. **Resum de partida** — donar puntuació, estadístiques, mutacions descobertes i
-   configuració final de la ciutat a la pantalla de victòria o derrota.
+10. **Resum de partida** — ✅ la pantalla final mostra puntuació, estadístiques, dificultat,
+  mapa, defenses finals i mutacions descobertes.
 
 Cada punt s'ha d'implementar amb una prova o simulació que pugui detectar una regressió.
 
