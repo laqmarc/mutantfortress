@@ -53,9 +53,29 @@ Aquesta és la taula de categoria → mutació:
 
 Amb teclat: `M` agafa la primera opció i `⇧M` la segona.
 
-Dues torres mutades **adjacents** es poden fusionar en una arma de tercer nivell
-(Llança Criogènica, Rail Orbital, Cúpula Gravitatòria, Supernova…). La taula de fusions
-és a `src/config.js`.
+### Fusions
+
+Dues torres mutades **adjacents** es poden fusionar en una arma de tercer nivell. Amb 6
+mutacions hi ha **21 combinacions possibles** —15 parelles diferents i 6 del mateix
+tipus— i **cadascuna dona una torre pròpia**: no n'hi ha cap de repetida ni cap que caigui
+en un resultat genèric.
+
+Les del mateix tipus amplifiquen la identitat de la mutació (Gel + Gel dona el Zero
+Absolut, que ho deixa tot al 25% de velocitat; Perforador + Perforador dona la Llança
+Gauss, 70 de dany i abast 5,2), i les mixtes la combinen (Perforador + Ancoratge dona el
+Canó de Setge, l'abast més llarg del tauler però cec al que té al costat i als aeris).
+
+La taula és a `src/config.js` i `tools/test-towers.mjs` en verifica la cobertura completa.
+
+### Millores de nivell
+
+Qualsevol torre es pot reforçar fins al **nivell 3**: cada nivell dona **+30% de dany i
++0,25 d'abast**, i es manté en mutar i en fusionar (una fusió es queda el millor nivell
+de les dues). El cost puja amb el nivell i amb el tier, i reciclar-la en retorna la
+meitat del que hi hagis invertit.
+
+És sobretot el sumider de la ferralla del final de partida, quan ja no queda lloc on
+construir: aleshores la decisió passa a ser expandir-se o concentrar.
 
 ### El mapa és una eina
 
@@ -93,14 +113,15 @@ simular sense navegador.
 node tools/balance.mjs 40      # 40 partides senceres amb una IA bàsica
 node tools/test-mutation.mjs   # proves de la mecànica de mutació
 node tools/test-routes.mjs     # comprova que cap enemic camini fora de les línies
+node tools/test-towers.mjs     # cobertura de l'arbre de fusions i sistema de millores
 ```
 
 Juga N partides senceres amb una IA bàsica i treu la taxa de victòries, les mutacions per
 partida i el dany al nucli onada per onada. Serveix per detectar corbes de dificultat
 invertides i bucles infinits abans de tocar res a mà.
 
-Referència actual (40 partides, IA bàsica): **68% de victòries**, 7,7 mutacions i 2,4
-fusions per partida, ~382 tics d'invasió. Com que la IA no reposiciona torres ni fa servir
+Referència actual (40 partides, IA bàsica): **70% de victòries**, 6,4 mutacions i 2,0
+fusions per partida. Com que la IA no reposiciona torres ni fa servir
 la sobrecàrrega, un jugador humà hauria d'anar bastant per sobre d'aquests números.
 
 ## Controls

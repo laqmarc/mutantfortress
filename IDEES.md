@@ -3,21 +3,13 @@
 Backlog de millores per a Fortalesa Mutant, ordenat per retorn sobre esforç.
 Anotat el 2026-09-17, després de tenir el joc jugable amb so i preparat per a Playables.
 
-> ✅ **Mutació amb elecció** — feta. Era la primera d'aquesta llista.
+> ✅ **Mutació amb elecció** — feta.
+> ✅ **Arbre de fusions complet** — fet: 21 parelles, 21 torres diferents.
+> ✅ **Millores de nivell** — fetes, i de passada resolen el sumider de ferralla.
 
 ---
 
 ## Prioritat alta
-
-### Ampliar l'arbre de fusions
-
-Amb 6 mutacions hi ha **21 combinacions** possibles (15 parelles diferents + 6 del mateix
-tipus) i la taula `FUSIONS` de `src/config.js` només en té 10 definides: **11 de 21 cauen
-a l'Amalgama genèrica**. Més de la meitat de les fusions que descobreixi un jugador seran
-la mateixa torre insípida.
-
-Feina mecànica però és exactament el contingut que fa voler rejugar. Cal nom, descripció
-(EN i CA a `src/i18n.js`), estadístiques i silueta a `drawTowerBody()` de `src/render.js`.
 
 ### Mode infinit i nivells de dificultat
 

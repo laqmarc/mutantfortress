@@ -611,6 +611,21 @@ function drawRanges(ctx, g, view) {
   }
 }
 
+/**
+ * Famílies de silueta. Cada fusió dibuixa com la branca de la qual ve, i
+ * l'anell exterior de tier 3 més el color ja la distingeixen de la mutació.
+ */
+const FAM = {
+  triangle: new Set(['pulsar', 'gel', 'prisma',
+    'zeroabsolut', 'gebre', 'fractal', 'caleidoscopi']),
+  morter: new Set(['morter', 'incineradora', 'supernova', 'forn', 'pira']),
+  prongs: new Set(['arc', 'cupula', 'malla', 'interferidor', 'singularitat']),
+  barrel: new Set(['perforador', 'criogenica', 'rail',
+    'gauss', 'setge', 'quantic', 'termolanca']),
+  ring: new Set(['xarxa', 'ancoratge', 'contrast', 'amalgama',
+    'pilar', 'glacera', 'xarxaigni']),
+};
+
 // ── Torres ─────────────────────────────────────────────────
 function drawTower(ctx, g, t, time, view, dt) {
   const def = TOWERS[t.key];
@@ -695,6 +710,21 @@ function drawTower(ctx, g, t, time, view, dt) {
       ctx.restore();
     }
   }
+  // galons de reforç: un per nivell per damunt del base
+  const lvl = t.lvl || 1;
+  if (lvl > 1) {
+    const w = Math.max(1, K * 0.8);
+    ctx.save();
+    ctx.fillStyle = '#ffd24d';
+    ctx.shadowColor = '#ffd24d';
+    ctx.shadowBlur = 6;
+    for (let i = 0; i < lvl - 1; i++) {
+      const gx = px + (i - (lvl - 2) / 2) * 8 * w;
+      poly(ctx, gx, py - CELL * 0.44, 3.2 * w, 3, -Math.PI / 2);
+      ctx.fill();
+    }
+    ctx.restore();
+  }
   if (off) {
     ctx.save();
     ctx.fillStyle = '#ff5b6e';
@@ -708,9 +738,10 @@ function drawTower(ctx, g, t, time, view, dt) {
 
 function drawTowerBody(ctx, t, def, r, time) {
   const k = t.key;
-  if (k === 'pulsar' || k === 'gel' || k === 'prisma') {
-    const rot = time * (k === 'prisma' ? 0.006 : 0.003);
-    ctx.strokeStyle = k === 'prisma' ? `hsl(${(time * 0.12) % 360},100%,70%)` : def.color;
+  if (FAM.triangle.has(k)) {
+    const rot = time * (k === 'prisma' || k === 'caleidoscopi' ? 0.006 : 0.003);
+    const arcoiris = k === 'prisma' || k === 'caleidoscopi';
+    ctx.strokeStyle = arcoiris ? `hsl(${(time * 0.12) % 360},100%,70%)` : def.color;
     ctx.lineWidth = 3;
     poly(ctx, 0, 0, r, 3, rot);
     ctx.stroke();
@@ -721,7 +752,7 @@ function drawTowerBody(ctx, t, def, r, time) {
     core.addColorStop(1, def.accent);
     ctx.fillStyle = core;
     ctx.beginPath(); ctx.arc(0, 0, r * 0.26, 0, Math.PI * 2); ctx.fill();
-  } else if (k === 'morter' || k === 'incineradora' || k === 'supernova') {
+  } else if (FAM.morter.has(k)) {
     const body = ctx.createLinearGradient(-r, -r, r, r);
     body.addColorStop(0, def.accent);
     body.addColorStop(0.5, def.color);
@@ -741,7 +772,7 @@ function drawTowerBody(ctx, t, def, r, time) {
     roundRect(ctx, r * 0.95, -2.5, 5, 5, 2);
     ctx.fill();
     ctx.restore();
-  } else if (k === 'arc' || k === 'cupula') {
+  } else if (FAM.prongs.has(k)) {
     ctx.strokeStyle = def.color;
     ctx.lineWidth = 3;
     for (let i = 0; i < 3; i++) {
@@ -784,7 +815,7 @@ function drawTowerBody(ctx, t, def, r, time) {
       ctx.closePath();
       ctx.fill();
     }
-  } else if (k === 'perforador' || k === 'criogenica' || k === 'rail') {
+  } else if (FAM.barrel.has(k)) {
     const body = ctx.createLinearGradient(-r, -r, r, r);
     body.addColorStop(0, def.accent);
     body.addColorStop(1, def.color);
@@ -803,7 +834,7 @@ function drawTowerBody(ctx, t, def, r, time) {
     roundRect(ctx, r * 1.25, -1.5, 3, 3, 1);
     ctx.fill();
     ctx.restore();
-  } else if (k === 'xarxa' || k === 'ancoratge' || k === 'contrast' || k === 'amalgama') {
+  } else if (FAM.ring.has(k)) {
     ctx.strokeStyle = def.color;
     ctx.lineWidth = 3;
     ctx.beginPath(); ctx.arc(0, 0, r * 0.8, 0, Math.PI * 2); ctx.stroke();

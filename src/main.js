@@ -5,7 +5,7 @@ import { inBounds, isCoreCell, allSpawnsConnected } from './grid.js';
 import {
   createGame, startPlanning, startInvasion, invasionTick, buildTower, moveTower,
   transformTower, mutateTower, fuseTowers, recycleTower, overload, towerAt, cellAt,
-  canFusePair, logMsg, mutationOptions,
+  canFusePair, logMsg, mutationOptions, upgradeTower,
 } from './game.js';
 import { resizeCanvas, getContext, draw, fxFromTick, fxAt } from './render.js';
 import * as fxp from './fx.js';
@@ -385,6 +385,14 @@ function onAction(act, tw, arg) {
       view.mode = 'fuse';
       UI.setHint('ui.fuseHint', { name: towerName(tw.key) });
       break;
+    case 'millorar': {
+      const r = upgradeTower(g, tw);
+      if (!r.ok) { audio.sfx('error'); return UI.setHint(r.msg, r.params, true); }
+      audio.sfx('build');
+      fxAt(tw.x, tw.y, TOWERS[tw.key].accent, 'build');
+      UI.setHint('ui.upgraded', { name: towerName(tw.key), n: r.lvl });
+      break;
+    }
     case 'reciclar':
       audio.sfx('recycle');
       fxAt(tw.x, tw.y, TOWERS[tw.key].color, 'move');

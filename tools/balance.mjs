@@ -6,7 +6,7 @@ import { waveName } from '../src/i18n.js';
 import { idx, isCoreCell, allSpawnsConnected, flowField } from '../src/grid.js';
 import {
   createGame, startPlanning, startInvasion, invasionTick, buildTower, mutateTower,
-  fuseTowers, canMutate, canFusePair, towerAt, mutationOptions,
+  fuseTowers, canMutate, canFusePair, towerAt, mutationOptions, canUpgrade, upgradeTower, upgradeCost,
 } from '../src/game.js';
 
 /** Puntua una casella: com més camí enemic li passi a tir, millor. */
@@ -53,6 +53,12 @@ function planTurn(g) {
       const opts = mutationOptions(t);
       mutateTower(g, t, opts[Math.floor(g.rng() * opts.length)]);
     }
+  }
+  // la ferralla sobrant va a reforçar les torres que més maten
+  const perBaixes = [...g.towers.values()].sort((a, b) => b.totalKills - a.totalKills);
+  for (const t of perBaixes) {
+    if (g.energy < 4) break;
+    if (canUpgrade(g, t) && g.scrap > upgradeCost(t) + 60) upgradeTower(g, t);
   }
   let guard = 0;
   while (guard++ < 12 && g.energy >= COST.build) {

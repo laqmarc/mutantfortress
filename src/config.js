@@ -27,6 +27,16 @@ export const COST = {
 export const TRANSFORM_SCRAP = 12;
 export const FUSE_SCRAP = 45;
 export const EMERGENCY_MULT = 2;  // accions durant la invasió costen el doble
+/** Millores de nivell: el sumider on va la ferralla sobrant del final de partida. */
+export const UPGRADE = {
+  maxLevel: 3,
+  energy: 2,
+  dmgPerLevel: 0.30,        // +30% de dany acumulatiu per nivell
+  rangePerLevel: 0.25,
+  // puja amb el nivell i amb el tier: reforçar una fusió costa més que una base
+  scrap: (tier, lvl) => Math.round(28 * lvl * (1 + (tier - 1) * 0.45)),
+};
+
 export const MUTATE_KILLS = 7;    // baixes necessàries per poder mutar
                                   // (pujat de 6 en afegir l'elecció: triar és poder)
 
@@ -86,29 +96,117 @@ export const TOWERS = {
   },
 
   // ── Fusions (tier 3) ──
+  // N'hi ha una per a cadascuna de les 21 parelles possibles de mutacions.
+  // Les del mateix tipus amplifiquen la identitat; les mixtes la combinen.
+
+  // Pures (mutació + la mateixa mutació)
+  zeroabsolut: {
+    tier: 3, dmg: 20, range: 4.0, cd: 1,
+    splash: 2.0, slow: 0.25, slowTicks: 3, air: true,
+    color: '#a8f4ff', accent: '#ffffff',
+  },
+  gauss: {
+    tier: 3, dmg: 70, range: 5.2, cd: 3,
+    pierce: true, air: true, color: '#ff4060', accent: '#ffd0d8',
+  },
+  malla: {
+    tier: 3, dmg: 14, range: 4.2, cd: 1,
+    allTargets: true, root: 2, airPriority: true, air: true,
+    color: '#3fffc8', accent: '#d9fff4',
+  },
+  forn: {
+    tier: 3, dmg: 20, range: 3.0, cd: 1,
+    splash: 2.0, burn: 10, burnTicks: 4, noSplit: true, air: false,
+    color: '#ff6a00', accent: '#ffd9a8',
+  },
+  pilar: {
+    tier: 3, dmg: 18, range: 5.0, cd: 2,
+    aura: 1.6, eventImmune: true, air: true,
+    color: '#fff0a0', accent: '#ffffff',
+  },
+  caleidoscopi: {
+    tier: 3, dmg: 28, dmgVar: 26, range: 3.4, cd: 1,
+    stunChance: 0.35, chain: 3, chainRange: 2.2, air: true,
+    color: '#ff8ae8', accent: '#ffe6fa',
+  },
+
+  // Mixtes
   criogenica: {
     tier: 3, dmg: 38, range: 4.0, cd: 1,
     slow: 0.35, slowTicks: 3, pierce: true, air: true,
     color: '#9ae9ff', accent: '#ffffff',
+  },
+  gebre: {
+    tier: 3, dmg: 16, range: 3.8, cd: 1,
+    splash: 1.6, slow: 0.4, slowTicks: 3, root: 1, air: true,
+    color: '#7fd8ff', accent: '#eaf9ff',
   },
   contrast: {
     tier: 3, dmg: 24, range: 3.6, cd: 1,
     splash: 1.8, burn: 6, burnTicks: 3, slow: 0.6, slowTicks: 2,
     bonusVsSlowed: 2, air: true, color: '#ffb36e', accent: '#fff0d8',
   },
+  glacera: {
+    tier: 3, dmg: 22, range: 4.4, cd: 2,
+    slow: 0.45, slowTicks: 3, aura: 0.8, eventImmune: true, air: true,
+    color: '#cfe9ff', accent: '#ffffff',
+  },
+  fractal: {
+    tier: 3, dmg: 22, dmgVar: 16, range: 3.4, cd: 1,
+    chain: 3, chainRange: 2.0, slow: 0.5, slowTicks: 2, air: true,
+    color: '#b9c8ff', accent: '#f0f4ff',
+  },
   rail: {
     tier: 3, dmg: 34, range: 5.0, cd: 2,
     line: true, pierce: true, air: true, color: '#8ef0ff', accent: '#ffffff',
   },
+  termolanca: {
+    tier: 3, dmg: 40, range: 3.6, cd: 2,
+    pierce: true, burn: 9, burnTicks: 3, noSplit: true, air: true,
+    color: '#ff8340', accent: '#ffe0c0',
+  },
+  setge: {
+    tier: 3, dmg: 46, range: 5.4, cd: 3, minRange: 1.6,
+    pierce: true, aura: 0.6, eventImmune: true, air: false,
+    color: '#ffc46b', accent: '#fff2d4',
+  },
+  quantic: {
+    tier: 3, dmg: 34, dmgVar: 18, range: 3.8, cd: 2,
+    pierce: true, stunChance: 0.3, air: true,
+    color: '#ff7ab0', accent: '#ffe0ee',
+  },
+  xarxaigni: {
+    tier: 3, dmg: 15, range: 3.6, cd: 1,
+    root: 2, burn: 7, burnTicks: 3, splash: 1.3, airPriority: true, air: true,
+    color: '#7cffa0', accent: '#e4ffe c'.replace(' ', ''),
+  },
   cupula: {
     tier: 3, dmg: 16, range: 3.4, cd: 1,
     allTargets: true, root: 1, air: true, color: '#c9a7ff', accent: '#f0e6ff',
+  },
+  interferidor: {
+    tier: 3, dmg: 18, range: 3.6, cd: 1,
+    chain: 3, chainRange: 2.4, stunChance: 0.4, root: 1, air: true,
+    color: '#9fffe0', accent: '#e6fff8',
+  },
+  pira: {
+    tier: 3, dmg: 20, range: 4.0, cd: 1,
+    splash: 1.8, burn: 8, burnTicks: 4, aura: 0.7, eventImmune: true, air: false,
+    color: '#ffa63d', accent: '#ffe7c4',
   },
   supernova: {
     tier: 3, dmg: 62, range: 4.2, cd: 3,
     splash: 2.4, burn: 8, burnTicks: 3, air: true,
     color: '#ff7ad1', accent: '#fff0fb',
   },
+  singularitat: {
+    tier: 3, dmg: 22, range: 3.8, cd: 1,
+    allTargets: true, root: 1, stunChance: 0.25, aura: 0.9, eventImmune: true, air: true,
+    color: '#d8b4ff', accent: '#f6ecff',
+  },
+
+  // Xarxa de seguretat: cap parella hi hauria d'arribar, però si algun dia
+  // s'afegeix una mutació sense omplir la taula, el joc no es trenca.
   amalgama: {
     tier: 3, dmg: 30, range: 3.8, cd: 1,
     splash: 1.3, pierce: true, air: true, color: '#9dffb0', accent: '#e8ffee',
@@ -126,18 +224,36 @@ export const MUTATION_BY_PROFILE = {
   basic: 'prisma',
 };
 
-// Taula de fusions (parella no ordenada de tier 2 → tier 3)
+// Taula de fusions: les 21 parelles possibles de mutacions, cadascuna amb
+// resultat propi. 6 pures (mutació amb ella mateixa) + 15 mixtes.
 export const FUSIONS = [
+  // pures
+  { a: 'gel', b: 'gel', r: 'zeroabsolut' },
+  { a: 'perforador', b: 'perforador', r: 'gauss' },
+  { a: 'xarxa', b: 'xarxa', r: 'malla' },
+  { a: 'incineradora', b: 'incineradora', r: 'forn' },
+  { a: 'ancoratge', b: 'ancoratge', r: 'pilar' },
+  { a: 'prisma', b: 'prisma', r: 'caleidoscopi' },
+  // gel
   { a: 'gel', b: 'perforador', r: 'criogenica' },
+  { a: 'gel', b: 'xarxa', r: 'gebre' },
   { a: 'gel', b: 'incineradora', r: 'contrast' },
+  { a: 'gel', b: 'ancoratge', r: 'glacera' },
+  { a: 'gel', b: 'prisma', r: 'fractal' },
+  // perforador
   { a: 'perforador', b: 'xarxa', r: 'rail' },
+  { a: 'perforador', b: 'incineradora', r: 'termolanca' },
+  { a: 'perforador', b: 'ancoratge', r: 'setge' },
+  { a: 'perforador', b: 'prisma', r: 'quantic' },
+  // xarxa
+  { a: 'xarxa', b: 'incineradora', r: 'xarxaigni' },
   { a: 'xarxa', b: 'ancoratge', r: 'cupula' },
+  { a: 'xarxa', b: 'prisma', r: 'interferidor' },
+  // incineradora
+  { a: 'incineradora', b: 'ancoratge', r: 'pira' },
   { a: 'incineradora', b: 'prisma', r: 'supernova' },
-  { a: 'gel', b: 'xarxa', r: 'cupula' },
-  { a: 'perforador', b: 'prisma', r: 'rail' },
-  { a: 'ancoratge', b: 'prisma', r: 'supernova' },
-  { a: 'incineradora', b: 'perforador', r: 'criogenica' },
-  { a: 'gel', b: 'ancoratge', r: 'contrast' },
+  // ancoratge
+  { a: 'ancoratge', b: 'prisma', r: 'singularitat' },
 ];
 
 export const BASE_TOWERS = ['pulsar', 'morter', 'arc', 'bastio'];

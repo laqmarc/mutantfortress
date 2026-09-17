@@ -27,7 +27,7 @@ export function serialize(g, extra = {}) {
     grounded: g.modifiers.grounded,
     disabled: [...g.modifiers.disabled].map((id) => index.get(id)).filter((i) => i != null),
     eventId: g.pendingEvent ? g.pendingEvent.id : null,
-    towers: towers.map((t) => [t.key, t.x, t.y, t.totalKills, t.kills]),
+    towers: towers.map((t) => [t.key, t.x, t.y, t.totalKills, t.kills, t.lvl || 1]),
     stats: g.stats,
     ...extra,
   });
@@ -94,13 +94,14 @@ export function restore(raw) {
         mutations: num(d.stats?.mutations, 0),
         fusions: num(d.stats?.fusions, 0),
         built: num(d.stats?.built, 0),
+        upgrades: num(d.stats?.upgrades, 0),
       },
     };
 
     let id = 1;
     const byIndex = [];
     for (const row of Array.isArray(d.towers) ? d.towers : []) {
-      const [key, x, y, totalKills, kills] = row;
+      const [key, x, y, totalKills, kills, lvl] = row;
       if (!TOWERS[key]) continue;                       // torre d'una versió futura: s'ignora
       if (!Number.isInteger(x) || !Number.isInteger(y)) continue;
       if (x < 0 || y < 0 || x >= GRID_W || y >= GRID_H) continue;
@@ -109,6 +110,7 @@ export function restore(raw) {
         id: id++, key, x, y, cd: 0,
         kills: sanitizeKills(kills),
         totalKills: num(totalKills, 0),
+        lvl: Math.min(3, Math.max(1, Number.isFinite(lvl) ? lvl : 1)),
         disabled: 0, angle: 0, flash: 0, recoil: 0, spawnAnim: 0, born: d.wave,
       };
       g.towers.set(t.id, t);

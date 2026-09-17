@@ -1,7 +1,7 @@
 // Motor de joc: estat, accions de planificació i resolució de la invasió
 import {
   GRID_W, GRID_H, START, COST, TRANSFORM_SCRAP, FUSE_SCRAP, EMERGENCY_MULT,
-  MUTATE_KILLS, TOWERS, ENEMIES, WAVES, EVENTS, MUTATION_BY_PROFILE, FUSIONS,
+  MUTATE_KILLS, TOWERS, ENEMIES, WAVES, EVENTS, MUTATION_BY_PROFILE, FUSIONS, UPGRADE,
 } from './config.js';
 import {
   mulberry32, idx, inBounds, coreRect, coreCenter, isCoreCell, generateTerrain,
@@ -43,7 +43,7 @@ export function createGame(seed) {
     overloadUsed: false,
     log: [],
     fx: { shots: [], hits: [], floats: [], shakes: 0, sounds: [] },
-    stats: { kills: 0, leaked: 0, mutations: 0, fusions: 0, built: 0 },
+    stats: { kills: 0, leaked: 0, mutations: 0, fusions: 0, built: 0, upgrades: 0 },
   };
   g.field = recomputeField(g);
   logMsg(g, 'log.boot', null, 'good');
@@ -81,8 +81,16 @@ export function towerStats(g, t) {
     if (!od.aura) continue;
     if (Math.max(Math.abs(o.x - t.x), Math.abs(o.y - t.y)) <= 1) bonus += od.aura;
   }
+  // nivell de millora: escala dany i abast
+  const lvl = t.lvl || 1;
+  const mul = 1 + UPGRADE.dmgPerLevel * (lvl - 1);
+  st.lvl = lvl;
+  st.dmg = Math.round(def.dmg * mul);
+  if (def.dmgVar) st.dmgVar = Math.round(def.dmgVar * mul);
+  if (def.burn) st.burn = Math.round(def.burn * mul);
+
   const fogHit = def.eventImmune ? 0 : g.modifiers.fog;
-  st.range = Math.max(1.1, def.range + bonus - fogHit);
+  st.range = Math.max(1.1, def.range + UPGRADE.rangePerLevel * (lvl - 1) + bonus - fogHit);
   st.rangeBonus = bonus;
   st.fog = fogHit;
   return st;
@@ -119,7 +127,7 @@ export function buildTower(g, key, x, y) {
   pay(g, COST.build, def.cost);
   const t = {
     id: uid(), key, x, y, cd: 0, kills: {}, totalKills: 0,
-    disabled: 0, angle: 0, flash: 0, recoil: 0, spawnAnim: 1, born: g.wave,
+    lvl: 1, disabled: 0, angle: 0, flash: 0, recoil: 0, spawnAnim: 1, born: g.wave,
   };
   g.towers.set(t.id, t);
   c.tower = t.id;
@@ -258,6 +266,7 @@ export function fuseTowers(g, a, b) {
   for (const [k, v] of Object.entries(b.kills)) a.kills[k] = (a.kills[k] || 0) + v;
   a.totalKills += b.totalKills;
   a.key = key;
+  a.lvl = Math.max(a.lvl || 1, b.lvl || 1);   // la fusió conserva el millor reforç
   a.cd = 0;
   a.flash = 1;
   g.field = recomputeField(g);
@@ -266,9 +275,36 @@ export function fuseTowers(g, a, b) {
   return { ...done(), key };
 }
 
+/** Cost en ferralla de pujar del nivell actual al següent. */
+export function upgradeCost(t) {
+  return UPGRADE.scrap(TOWERS[t.key].tier, t.lvl || 1);
+}
+
+export function canUpgrade(g, t) {
+  return (t.lvl || 1) < UPGRADE.maxLevel;
+}
+
+/**
+ * Reforça una torre: +30% de dany i +0,25 d'abast per nivell, fins a 3.
+ * És el sumider natural de la ferralla quan ja no queda lloc on construir.
+ */
+export function upgradeTower(g, t) {
+  if (!canUpgrade(g, t)) return fail('err.maxLevel');
+  const scrap = upgradeCost(t);
+  if (!canAfford(g, UPGRADE.energy, scrap)) return fail('err.noResources');
+  pay(g, UPGRADE.energy, scrap);
+  t.lvl = (t.lvl || 1) + 1;
+  t.flash = 1;
+  g.stats.upgrades++;
+  logMsg(g, 'log.upgraded', { tower: t.key, n: t.lvl }, 'good');
+  return { ...done(), lvl: t.lvl };
+}
+
 export function recycleTower(g, t) {
   const def = TOWERS[t.key];
-  const refund = Math.round((def.cost || 40) * 0.5) + def.tier * 10;
+  let invertit = 0;
+  for (let l = 1; l < (t.lvl || 1); l++) invertit += UPGRADE.scrap(def.tier, l);
+  const refund = Math.round((def.cost || 40) * 0.5) + def.tier * 10 + Math.round(invertit * 0.5);
   cellAt(g, t.x, t.y).tower = null;
   g.towers.delete(t.id);
   g.scrap += refund;

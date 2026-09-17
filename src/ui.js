@@ -2,10 +2,11 @@
 // Cap text literal: tot passa per i18n.js.
 import {
   TOWERS, ENEMIES, EVENTS, BASE_TOWERS, WAVES, COST, TRANSFORM_SCRAP, FUSE_SCRAP,
-  MUTATE_KILLS, EMERGENCY_MULT,
+  MUTATE_KILLS, EMERGENCY_MULT, UPGRADE,
 } from './config.js';
 import {
   towerStats, killProfile, mutationOptions, canMutate, canFusePair, fusionResult,
+  canUpgrade, upgradeCost,
   upcomingComposition,
 } from './game.js';
 import {
@@ -123,7 +124,7 @@ export function renderInspector(g, view, actions) {
   const ready = canMutate(g, tw);
   const m = g.phase === 'invasion' ? EMERGENCY_MULT : 1;
 
-  let html = headHtml(tw.key);
+  let html = headHtml(tw.key, tw);
   html += `<div class="insp-desc">${towerDesc(tw.key)}</div>`;
   html += statsHtml(tw.key, st);
   html += tagsHtml(tw.key);
@@ -171,8 +172,16 @@ export function renderInspector(g, view, actions) {
     html += btn('fusionar', `${t('insp.actFuse')} <span class="cost">⚡${COST.fuse * m} ✦${FUSE_SCRAP}</span>`,
       !!findFusePartner(g, tw) && g.energy >= COST.fuse * m && g.scrap >= FUSE_SCRAP);
   }
+  const potPujar = canUpgrade(g, tw);
+  const cost = potPujar ? upgradeCost(tw) : 0;
+  html += btn('millorar',
+    `${t('insp.actUpgrade')} <span class="cost">${potPujar
+      ? `⚡${UPGRADE.energy * m} ✦${cost} · ${t('insp.upgradeTo', { n: (tw.lvl || 1) + 1 })}`
+      : t('insp.maxLevel')}</span>`,
+    potPujar && g.energy >= UPGRADE.energy * m && g.scrap >= cost);
   html += btn('reciclar', `${t('insp.actRecycle')} <span class="cost">${t('insp.actRecycleCost')}</span>`, true, 'danger');
   html += '</div>';
+  html += `<div class="mo-note" style="margin-top:7px">${t('insp.upgradeEffect')}</div>`;
 
   if (view.mode === 'transform') {
     html += '<div style="margin-top:10px" class="acts">';
@@ -204,12 +213,14 @@ export function findFusePartner(g, tw) {
   return null;
 }
 
-function headHtml(key) {
+function headHtml(key, tw = null) {
   const d = TOWERS[key];
   const tier = d.tier === 1 ? 'insp.base' : d.tier === 2 ? 'insp.mutation' : 'insp.fusion';
+  const lvl = tw ? (tw.lvl || 1) : 1;
   return `<div class="insp-head">
     <div class="dot" style="background:${d.color};color:${d.color}"></div>
     <div class="nm" style="color:${d.color}">${towerName(key)}</div>
+    ${lvl > 1 ? `<div class="lvl">${t('insp.level', { n: lvl })}</div>` : ''}
     <div class="tier" style="color:${d.tier === 3 ? '#fff' : d.accent}">${t(tier)}</div>
   </div>`;
 }
@@ -217,7 +228,7 @@ function headHtml(key) {
 function statsHtml(key, st) {
   const d = TOWERS[key];
   const rows = [
-    [t('insp.damage'), d.dmgVar ? `${d.dmg - d.dmgVar}–${d.dmg + d.dmgVar}` : d.dmg],
+    [t('insp.damage'), st.dmgVar ? `${st.dmg - st.dmgVar}–${st.dmg + st.dmgVar}` : st.dmg],
     [t('insp.range'), st.range.toFixed(1) + (st.rangeBonus ? ` (+${st.rangeBonus.toFixed(1)})` : '') + (st.fog ? ' 🌫' : '')],
     [t('insp.rate'), `1/${d.cd} ${t(d.cd > 1 ? 'insp.ticks' : 'insp.tick')}`],
     [t('insp.air'), t(d.air ? 'insp.yes' : 'insp.no')],
@@ -226,7 +237,7 @@ function statsHtml(key, st) {
   if (d.chain) rows.push([t('insp.chain'), t('insp.jumps', { n: d.chain })]);
   if (d.pierce) rows.push([t('insp.armour'), t('insp.armourIgnored')]);
   if (d.slow) rows.push([t('insp.slows'), t('insp.toPct', { n: Math.round(d.slow * 100) })]);
-  if (d.burn) rows.push([t('insp.burn'), t('insp.perTick', { n: d.burn })]);
+  if (d.burn) rows.push([t('insp.burn'), t('insp.perTick', { n: st.burn || d.burn })]);
   return `<div class="stats">${rows.map(([k, v]) => `<div class="stat"><span>${k}</span><b>${v}</b></div>`).join('')}</div>`;
 }
 

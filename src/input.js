@@ -236,6 +236,7 @@ export function initInput(api) {
       case 'f': if (sel) api.action('fusionar', sel); return;
       case 'r': if (sel) api.action('mover', sel); return;
       case 't': if (sel) api.action('transformar', sel); return;
+      case 'u': if (sel) api.action('millorar', sel); return;
       case 'x': if (sel) api.action('reciclar', sel); return;
     }
   });
